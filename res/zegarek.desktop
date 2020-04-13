@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Zegarek
+Comment=A simple clock with milisecond resolution
+Exec=zegarek
+Icon=zegarek-icon
+Terminal=false
+Categories=Utility;
