@@ -27,7 +27,7 @@ template run(cmd: string) =
 proc convertImage(filePath: string) =
   let filename = filePath.splitFile().name
   for size in ["16x16", "32x32", "64x64", "128x128", "256x256"]:
-    let cmd = fmt"convert {filePath} -resize {size} AppDir/usr/share/icons/hicolor/{size}/apps/{filename}.png"
+    let cmd = fmt"convert {filePath} -resize {size} -transparent white  AppDir/usr/share/icons/hicolor/{size}/apps/{filename}.png"
     echo cmd
     run cmd
 
