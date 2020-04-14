@@ -1,0 +1,26 @@
+#
+# Konrad <>, 2020.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: 0.1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2020-04-14 21:56+0200\n"
+"PO-Revision-Date: 2020-04-14 21:48+0200\n"
+"Last-Translator: Konrad <>\n"
+"Language-Team: Polish <>\n"
+"Language: pl\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 "
+"|| n%100>=20) ? 1 : 2)\n"
+"X-Generator: Gtranslator 3.36.0\n"
+
+#: src/main.glade:39
+msgid "Pause"
+msgstr "Wstrzymaj"
+
+#: build/zegarek.desktop.in:5
+msgid "A simple clock with millisecond resolution"
+msgstr "Prosty zegar z milisekundową dokładnością"

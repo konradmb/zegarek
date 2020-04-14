@@ -1,7 +1,9 @@
 import gintro/[gtk, gdk, glib, gobject, gio]
 import times
 import os, system
+import libintl
 
+const gettextPackage = "zegarek"
 let appdir = os.getAppDir() / "/"
 
 var continueClockUpdates = true
@@ -44,7 +46,18 @@ proc appActivateWithBuilder(app: Application) =
 
   showAll(window)
 
+proc activateGettext() =
+  discard setlocale(LC_ALL, "")
+  if existsDir(appdir /../ "build/locale"):
+    assert appdir /../ "build/locale" == bindtextdomain(gettextPackage, appdir /../ "build/locale");
+  elif existsDir(appdir /../ "/share/locale"):
+    assert appdir /../ "/share/locale" == bindtextdomain(gettextPackage, appdir /../ "/share/locale");
+  assert "UTF-8" == bind_textdomain_codeset(gettextPackage, "UTF-8");
+  assert gettextPackage == textdomain(gettextPackage);
+
 proc main: int =
+  activateGettext()
+
   let app = newApplication("com.github.konradmb.zegarek", {ApplicationFlag.nonUnique})
   connect(app, "activate", appActivateWithBuilder)
   return run(app)
