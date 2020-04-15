@@ -82,6 +82,11 @@ task appimage, "Build AppImage":
   run "nim c -d:release -o:AppDir/usr/bin/zegarek ../src/zegarek.nim"
 
   convertImage("../res/zegarek-icon.svg")
+
+  # Fix AppImage thumbnail creation
+  cpFile("AppDir/usr/share/icons/hicolor/256x256/apps/zegarek-icon.png", "AppDir/zegarek-icon.png")
+  run "cd AppDir && ln -s zegarek-icon.png .DirIcon"
+  
   cpFile("../res/zegarek-icon.svg", "AppDir/usr/share/icons/hicolor/scalable/apps/zegarek-icon.svg")
   cpFile("../res/zegarek.desktop", "AppDir/usr/share/applications/zegarek.desktop")
   cpFile("../src/main.css", "AppDir/usr/bin/main.css")
