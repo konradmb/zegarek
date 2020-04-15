@@ -1,6 +1,6 @@
 # Package
 
-version       = "0.2"
+version       = "0.3"
 author        = "konradmb"
 description   = "A simple clock with milisecond resolution"
 license       = "GPL-3.0"
@@ -27,7 +27,7 @@ template run(cmd: string) =
 proc convertImage(filePath: string) =
   let filename = filePath.splitFile().name
   for size in ["16x16", "32x32", "64x64", "128x128", "256x256"]:
-    let cmd = fmt"convert {filePath} -resize {size} -transparent white  AppDir/usr/share/icons/hicolor/{size}/apps/{filename}.png"
+    let cmd = fmt"convert {filePath} -resize {size} -transparent white -antialias AppDir/usr/share/icons/hicolor/{size}/apps/{filename}.png"
     echo cmd
     run cmd
 

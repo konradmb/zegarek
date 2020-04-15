@@ -1,26 +1,11 @@
 import gintro/[gtk, gdk, glib, gobject, gio]
-import times
 import os, system
 import libintl
 
+import clockTimer
+
 const gettextPackage = "zegarek"
 let appdir = os.getAppDir() / "/"
-
-var continueClockUpdates = true
-var label: Label
-
-proc updateClock(label: Label): bool =
-  let time = getTime().format("HH:mm:ss:fff")
-  label.text = time
-  continueClockUpdates
-
-proc addClockTimer() =
-  timeoutAdd(1, updateClock, label)
-
-proc pauseClock(button: Button) =
-  continueClockUpdates = not continueClockUpdates
-  if continueClockUpdates:
-    addClockTimer()
 
 proc appActivateWithBuilder(app: Application) =
   let builder = newBuilder()
@@ -32,17 +17,20 @@ proc appActivateWithBuilder(app: Application) =
   elif existsFile(appdir / "../res/zegarek-icon.svg"):
     discard window.setIconFromFile(appdir / "../res/zegarek-icon.svg")
 
-  label = builder.getLabel("timeLabel")
+  builder.getLabel("timeLabel").startClockTimer()
 
-  addClockTimer()
+  var button = builder.getButton("pause")
+  button.connect("clicked", pauseClock)
+
+  builder.getSpinButton("resolution").setSpinButton()
+
+  builder.getToggleButton("12Hours").connect12HoursButton()
+  builder.getToggleButton("24Hours").connect24HoursButton()
 
   let screen = getDefaultScreen()
   let cssProvider = newCssProvider()
   discard cssProvider.loadFromPath(appdir & "main.css")
   addProviderForScreen(screen, cssProvider, STYLE_PROVIDER_PRIORITY_APPLICATION)
-
-  var button = builder.getButton("pause")
-  button.connect("clicked", pauseClock)
 
   showAll(window)
 

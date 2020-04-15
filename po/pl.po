@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-04-14 21:56+0200\n"
+"POT-Creation-Date: 2020-04-15 03:57+0200\n"
 "PO-Revision-Date: 2020-04-14 21:48+0200\n"
 "Last-Translator: Konrad <>\n"
 "Language-Team: Polish <>\n"
@@ -17,7 +17,15 @@ msgstr ""
 "|| n%100>=20) ? 1 : 2)\n"
 "X-Generator: Gtranslator 3.36.0\n"
 
-#: src/main.glade:39
+#: src/main.glade:49
+msgid "Resolution"
+msgstr "Dokładność"
+
+#: src/main.glade:119
+msgid "Hour format"
+msgstr "Format godzin"
+
+#: src/main.glade:147
 msgid "Pause"
 msgstr "Wstrzymaj"
 
