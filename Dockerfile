@@ -131,6 +131,6 @@ RUN /bin/bash -c 'source $HOME/.bashrc; \
     nimble -y appimage'
 
 # WHY????
-RUN printf '\x00' | dd bs=1 seek=8 count=1 conv=notrunc of=`ls build/Zegarek*AppImage`
+# RUN printf '\x00' | dd bs=1 seek=8 count=1 conv=notrunc of=`ls build/Zegarek*AppImage`
 
 LABEL Name=zegarek
