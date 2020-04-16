@@ -1,0 +1,5 @@
+build/
+*~
+src/zegarek
+**/Dockerfile*
+README.md

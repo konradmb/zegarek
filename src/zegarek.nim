@@ -7,6 +7,9 @@ import clockTimer
 const gettextPackage = "zegarek"
 let appdir = os.getAppDir() / "/"
 
+proc isAppimage(): bool =
+  existsEnv("APPIMAGE")
+
 proc appActivateWithBuilder(app: Application) =
   let builder = newBuilder()
   discard builder.addFromFile(appdir & "main.glade")
@@ -44,6 +47,8 @@ proc activateGettext() =
   assert gettextPackage == textdomain(gettextPackage);
 
 proc main: int =
+  if isAppimage():
+    putEnv("GTK_EXE_PREFIX", appdir /../ "")
   activateGettext()
 
   let app = newApplication("com.github.konradmb.zegarek", {ApplicationFlag.nonUnique})

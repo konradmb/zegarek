@@ -17,6 +17,8 @@ requires "nim >= 1.2.0"
 requires "gintro  >= 0.7.3"
 
 import strformat, strutils
+import sequtils
+import pegs
 from os import splitFile, `/`
 
 import macros
@@ -27,7 +29,7 @@ template run(cmd: string) =
 proc convertImage(filePath: string) =
   let filename = filePath.splitFile().name
   for size in ["16x16", "32x32", "64x64", "128x128", "256x256"]:
-    let cmd = fmt"convert {filePath} -resize {size} -transparent white -antialias AppDir/usr/share/icons/hicolor/{size}/apps/{filename}.png"
+    let cmd = fmt"rsvg-convert {filePath} -w {size.split('x')[0]} -h {size.split('x')[1]} -o AppDir/usr/share/icons/hicolor/{size}/apps/{filename}.png"
     echo cmd
     run cmd
 
@@ -76,7 +78,9 @@ task appimage, "Build AppImage":
   run """
     wget -c https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage &&
     chmod +x linuxdeploy-x86_64.AppImage &&
-    ./linuxdeploy-x86_64.AppImage --appdir AppDir
+    printf '\x00' | dd bs=1 seek=8 count=1 conv=notrunc of=linuxdeploy-x86_64.AppImage &&
+    ./linuxdeploy-x86_64.AppImage --appimage-extract
+    ./squashfs-root/AppRun --appdir AppDir
   """
 
   run "nim c -d:release -o:AppDir/usr/bin/zegarek ../src/zegarek.nim"
@@ -92,9 +96,33 @@ task appimage, "Build AppImage":
   cpFile("../src/main.css", "AppDir/usr/bin/main.css")
   cpFile("../src/main.glade", "AppDir/usr/bin/main.glade")
   cpDir("locale", "AppDir/usr/share/locale")
-  # run "xargs -i cp -L {} AppDir/usr/lib/ < ../libs"
+  if existsFile("requiredLibs"):
+    run "wget -c https://github.com/AppImage/pkg2appimage/raw/master/excludelist"
+    var requiredLibs = readFile("requiredLibs").splitLines().filterIt(not it.contains(">"))
+    for excludedLib in readFile("excludelist").splitLines():
+      # Ignore comments and empty lines
+      if excludedLib =~ peg"^\s*'#'.*" or excludedLib =~ peg"^\s*$":
+        continue
+      let excludedLib = excludedLib.split("#")[0].replace(" ", "")
 
-  run fmt"VERSION={version} ./linuxdeploy-x86_64.AppImage --appdir AppDir --output appimage"
+      requiredLibs = requiredLibs.filterIt(not it.contains(excludedLib))
+    writeFile("requiredLibsFiltered", requiredLibs.join("\n"))
+    echo "Filtered libs: ", requiredLibs
+    run "xargs -i cp -L {} AppDir/usr/lib/ < requiredLibsFiltered"
+    # Silence canberra error
+    var requiredSpecialLibs = readFile("requiredLibs").splitLines().filterIt(it.contains(">"))
+    for lib in requiredSpecialLibs:
+      echo fmt"Copying {lib}"
+      let splitLib = lib.replace(" ", "").split(">")
+      mkdir "AppDir/usr/lib"/splitLib[1].splitFile().dir
+      cpFile splitLib[0], "AppDir/usr/lib"/splitLib[1]
+
+  run fmt"VERSION={version} ./squashfs-root/AppRun  --appdir AppDir --output appimage"
+
+task appimageDocker, "Build AppImage in Docker":
+  run "docker build -t zegarek ."
+  mkdir "build"
+  run fmt"docker run -i --rm zegarek sh -c 'cd build && tar -c Zegarek*AppImage' | tar -x -C build/"
 
 macro repeatProc(procVar: untyped, args: varargs[untyped]): untyped =
   result = newNimNode(nnkStmtList)
@@ -111,7 +139,7 @@ template rmFile(files: varargs[string]) =
 
 task clean, "Clean build directory":
   cd("build")
-  rmDir "AppDir", "locale"
+  rmDir "AppDir", "locale", "squashfs-root"
   rmFile "zegarek.desktop", "zegarek.desktop.in"
   run("rm Zegarek*.AppImage")
 
