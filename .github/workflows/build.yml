@@ -1,0 +1,32 @@
+name: Build
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+    - uses: actions/checkout@v2
+
+    - name: Setup Nim environment
+      uses: jiro4989/setup-nim-action@v1.0.2
+      # with:
+      #   # The Nim version to download (if necessary) and use. Example: 1.0.2
+      #   nim-version: # optional, default is stable
+
+    # Runs a set of commands using the runners shell
+    - name: Build app
+      run: |
+        docker build -t zegarek .
+        nimble appimageDocker
+
+    - uses: actions/upload-artifact@v2
+      with:
+        name: AppImage
+        path: build/Zegarek*.AppImage
