@@ -45,6 +45,8 @@ RUN echo "PKG_CONFIG_PATH=/opt/gtk/lib64/pkgconfig:$PKG_CONFIG_PATH" >>  ~/.bash
 RUN echo "LD_LIBRARY_PATH=/opt/gtk/lib64:$LD_LIBRARY_PATH" >>  ~/.bashrc
 RUN echo "export GI_TYPELIB_PATH=/opt/gtk/lib64/girepository-1.0:/opt/gtk/lib/girepository-1.0:/usr/lib64/girepository-1.0" >>  ~/.bashrc
 
+RUN nimble -y install gintro
+
 COPY . /usr/src/zegarek
 WORKDIR /usr/src/zegarek
 
@@ -72,6 +74,7 @@ RUN echo $'\
 /lib64/libgcc_s.so.1\n\
 /lib64/libgraphite2.so.3\n\
 /lib64/libXau.so.6\n\
+/lib64/libxcb.so.1\n\
 /lib64/libX11.so.6\n\
 /lib64/libXext.so.6\n\
 /lib64/libGLdispatch.so.0\n\
@@ -83,6 +86,8 @@ RUN echo $'\
 /lib64/libexpat.so.1\n\
 /lib64/libGL.so.1\n\
 /lib64/libXrender.so.1\n\
+/lib64/libxcb-render.so.0\n\
+/lib64/libxcb-shm.so.0\n\
 /lib64/libEGL.so.1\n\
 /lib64/libpixman-1.so.0\n\
 /lib64/libthai.so.0\n\

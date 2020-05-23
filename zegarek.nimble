@@ -1,6 +1,6 @@
 # Package
 
-version       = "0.4.1"
+version       = "0.4.2"
 author        = "konradmb"
 description   = "A simple clock with milisecond resolution"
 license       = "GPL-3.0"
@@ -23,8 +23,11 @@ from os import splitFile, `/`
 
 import macros
 
+template runGorge(cmd: string): string =
+  gorge("cd " & system.getCurrentDir() & " && " & cmd)
+
 template run(cmd: string) =
-  echo gorge("cd " & system.getCurrentDir() & " && " & cmd)
+  echo runGorge(cmd)
 
 proc convertImage(filePath: string) =
   let filename = filePath.splitFile().name
@@ -39,6 +42,28 @@ proc getPackageName(): string =
     return packageName
   else:
     return "zegarek"
+
+proc downloadAndExtractAppImage(url: string, outputDir: string) =
+  let filename = runGorge fmt"""wget -cnv {url} 2>&1 |cut -d\" -f2"""
+  run fmt"""
+    chmod +x {filename} &&
+    printf '\x00' | dd bs=1 seek=8 count=1 conv=notrunc of={filename} &&
+    ./{filename} --appimage-extract
+    mv ./squashfs-root {outputDir}
+  """
+
+macro repeatProc(procVar: untyped, args: varargs[untyped]): untyped =
+  result = newNimNode(nnkStmtList)
+  for arg in args:
+    let a = quote do:
+      `procVar`(`arg`)
+    result.add(a)
+
+template rmDir(dirs: varargs[string]) =
+  repeatProc rmDir, dirs
+
+template rmFile(files: varargs[string]) =
+  repeatProc rmFile, files
 
 task updateL10n, "Update .pot and .po localisation files":
   mkdir "build"
@@ -75,13 +100,8 @@ task appimage, "Build AppImage":
   mkdir("build/AppDir")
   cd("build")
 
-  run """
-    wget -c https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage &&
-    chmod +x linuxdeploy-x86_64.AppImage &&
-    printf '\x00' | dd bs=1 seek=8 count=1 conv=notrunc of=linuxdeploy-x86_64.AppImage &&
-    ./linuxdeploy-x86_64.AppImage --appimage-extract
-    ./squashfs-root/AppRun --appdir AppDir
-  """
+  downloadAndExtractAppImage("https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage ", "linuxdeploy")
+  run "./linuxdeploy/AppRun --appdir AppDir"
 
   run "nim c -d:release -d:nimDebugDlOpen -o:AppDir/usr/bin/zegarek ../src/zegarek.nim"
 
@@ -93,6 +113,7 @@ task appimage, "Build AppImage":
   
   cpFile("../res/zegarek-icon.svg", "AppDir/usr/share/icons/hicolor/scalable/apps/zegarek-icon.svg")
   cpFile("../res/zegarek.desktop", "AppDir/usr/share/applications/zegarek.desktop")
+  cpFile("../res/zegarek.desktop", "AppDir/zegarek.desktop")
   cpFile("../src/main.css", "AppDir/usr/bin/main.css")
   cpFile("../src/main.glade", "AppDir/usr/bin/main.glade")
   cpDir("locale", "AppDir/usr/share/locale")
@@ -116,26 +137,20 @@ task appimage, "Build AppImage":
       let splitLib = lib.replace(" ", "").split(">")
       mkdir "AppDir/usr/lib"/splitLib[1].splitFile().dir
       cpFile splitLib[0], "AppDir/usr/lib"/splitLib[1]
+    # Blacklist additional libraries
+    let blacklistedLibs = ["libxcb-render.so.0", "libxcb-shm.so.0", "libcairo.so.2"]
+    writeFile("libs.blacklist", blacklistedLibs.join("\n") & "\n")
 
-  run fmt"VERSION={version} ./squashfs-root/AppRun  --appdir AppDir --output appimage"
+  run fmt"VERSION={version} ./linuxdeploy/AppRun  --appdir AppDir"
+  run """for i in `cat libs.blacklist`; do rm AppDir/usr/lib/"$i"; done"""
+
+  downloadAndExtractAppImage("https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage", "appimagetool")
+  run fmt"VERSION={version} ./appimagetool/AppRun AppDir"
 
 task appimageDocker, "Build AppImage in Docker":
   run "docker build -t zegarek ."
   mkdir "build"
   run fmt"docker run -i --rm zegarek sh -c 'cd build && tar -c Zegarek*AppImage' | tar -x -C build/"
-
-macro repeatProc(procVar: untyped, args: varargs[untyped]): untyped =
-  result = newNimNode(nnkStmtList)
-  for arg in args:
-    let a = quote do:
-      `procVar`(`arg`)
-    result.add(a)
-
-template rmDir(dirs: varargs[string]) =
-  repeatProc rmDir, dirs
-
-template rmFile(files: varargs[string]) =
-  repeatProc rmFile, files
 
 task clean, "Clean build directory":
   cd("build")
