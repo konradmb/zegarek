@@ -83,7 +83,7 @@ task appimage, "Build AppImage":
     ./squashfs-root/AppRun --appdir AppDir
   """
 
-  run "nim c -d:release -o:AppDir/usr/bin/zegarek ../src/zegarek.nim"
+  run "nim c -d:release -d:nimDebugDlOpen -o:AppDir/usr/bin/zegarek ../src/zegarek.nim"
 
   convertImage("../res/zegarek-icon.svg")
 
