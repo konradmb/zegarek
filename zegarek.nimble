@@ -138,11 +138,18 @@ task appimage, "Build AppImage":
       mkdir "AppDir/usr/lib"/splitLib[1].splitFile().dir
       cpFile splitLib[0], "AppDir/usr/lib"/splitLib[1]
     # Blacklist additional libraries
-    let blacklistedLibs = ["libxcb-render.so.0", "libxcb-shm.so.0", "libcairo.so.2"]
+    let blacklistedLibs = ["libpng16.so.16"]
     writeFile("libs.blacklist", blacklistedLibs.join("\n") & "\n")
 
   run fmt"VERSION={version} ./linuxdeploy/AppRun  --appdir AppDir"
   run """for i in `cat libs.blacklist`; do rm AppDir/usr/lib/"$i"; done"""
+  # run "cp /usr/local/lib64/libglib-2.0.so.0 AppDir/usr/lib/"
+  # run "cp /usr/local/lib64/libgio-2.0.so.0 AppDir/usr/lib/"
+  # run "cp /lib64/libcairo.so.2 AppDir/usr/lib/"
+  # run "cp /lib64/libfreetype.so.6 AppDir/usr/lib/"
+
+  # run "xargs -i cp -L {} AppDir/usr/lib/ < requiredLibs"
+
 
   downloadAndExtractAppImage("https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage", "appimagetool")
   run fmt"VERSION={version} ./appimagetool/AppRun AppDir"
