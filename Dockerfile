@@ -4,6 +4,7 @@ RUN apt update &&\
     apt install -y --no-install-recommends eatmydata software-properties-common &&\
     # add-apt-repository -u ppa:savoury1/fonts &&\
     # add-apt-repository -u ppa:ubuntu-toolchain-r/test &&\
+    add-apt-repository ppa:savoury1/backports &&\
     eatmydata apt -y install gcc build-essential cmake gettext wget curl librsvg2-bin git libgtk-3-dev \
     libgirepository1.0-dev file libcanberra-gtk3-dev libmount-dev \
     ninja-build/xenial-backports python3-pip flex bison python3-dev libfribidi-dev libharfbuzz-dev &&\
