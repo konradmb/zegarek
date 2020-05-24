@@ -111,14 +111,12 @@ RUN echo '\
 /lib/x86_64-linux-gnu/libz.so.1\n\
 /usr/local/lib/x86_64-linux-gnu/libgmodule-2.0.so.0\n\
 /usr/local/lib/x86_64-linux-gnu/libgio-2.0.so.0\n\
-/lib/x86_64-linux-gnu/libbsd.so.0\n\
-/usr/lib/x86_64-linux-gnu/libgraphite2.so.3\n\
 /usr/lib/x86_64-linux-gnu/libXdmcp.so.6\n\
 /usr/lib/x86_64-linux-gnu/libXau.so.6\n\
 /lib/x86_64-linux-gnu/libm.so.6\n\
-/usr/lib/x86_64-linux-gnu/libpng16.so.16\n\
+/lib/x86_64-linux-gnu/libpng12.so.0\n\
 /usr/lib/x86_64-linux-gnu/libfreetype.so.6\n\
-/usr/lib/x86_64-linux-gnu/libharfbuzz.so.0\n\
+/usr/local/lib/libharfbuzz.so.0\n\
 /usr/lib/x86_64-linux-gnu/libxcb.so.1\n\
 /usr/lib/x86_64-linux-gnu/libxcb-render.so.0\n\
 /usr/lib/x86_64-linux-gnu/libxcb-shm.so.0\n\
@@ -130,7 +128,7 @@ RUN echo '\
 /usr/local/lib/x86_64-linux-gnu/libpango-1.0.so.0\n\
 /usr/lib/x86_64-linux-gnu/libfontconfig.so.1\n\
 /usr/local/lib/x86_64-linux-gnu/libpangoft2-1.0.so.0\n\
-/usr/lib/x86_64-linux-gnu/libepoxy.so.0\n\
+/usr/local/lib/x86_64-linux-gnu/libepoxy.so.0\n\
 /usr/lib/x86_64-linux-gnu/libXext.so.6\n\
 /usr/lib/x86_64-linux-gnu/libcairo.so.2\n\
 /usr/lib/x86_64-linux-gnu/libXfixes.so.3\n\
@@ -146,7 +144,6 @@ RUN echo '\
 /opt/gtk/lib/libgdk-3.so.0\n\
 /lib/x86_64-linux-gnu/libgpg-error.so.0\n\
 /lib/x86_64-linux-gnu/libgcrypt.so.20\n\
-/usr/lib/x86_64-linux-gnu/liblz4.so.1\n\
 /lib/x86_64-linux-gnu/liblzma.so.5\n\
 /lib/x86_64-linux-gnu/libsystemd.so.0\n\
 /lib/x86_64-linux-gnu/libdbus-1.so.3\n\
@@ -156,8 +153,8 @@ RUN echo '\
 /opt/gtk/lib/libgtk-3.so.0\n\
 /lib/x86_64-linux-gnu/libgcc_s.so.1\n\
 /usr/lib/x86_64-linux-gnu/libstdc++.so.6\n\
-/usr/lib/x86_64-linux-gnu/libicudata.so.60\n\
-/usr/lib/x86_64-linux-gnu/libicuuc.so.60\n\
+/usr/lib/x86_64-linux-gnu/libicudata.so.55\n\
+/usr/lib/x86_64-linux-gnu/libicuuc.so.55\n\
 /usr/lib/x86_64-linux-gnu/libxml2.so.2\n\
 /usr/lib/x86_64-linux-gnu/libcroco-0.6.so.3\n\
 /usr/lib/x86_64-linux-gnu/librsvg-2.so.2\n\
