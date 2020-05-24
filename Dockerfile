@@ -11,9 +11,8 @@ RUN apt update &&\
     pip3 install meson &&\
     curl https://nim-lang.org/choosenim/init.sh -sSf > choosenim.sh &&\
     chmod +x ./choosenim.sh &&\
-    ./choosenim.sh -y &&\
-    echo 'export PATH=/root/.nimble/bin:$PATH' >> ~/.bashrc
-SHELL ["/bin/bash", "-c", "-l"]
+    ./choosenim.sh -y
+ENV PATH "/root/.nimble/bin:$PATH"
 
 WORKDIR /usr/local/src/pango
 RUN wget http://ftp.gnome.org/pub/GNOME/sources/pango/1.42/pango-1.42.4.tar.xz
@@ -22,8 +21,8 @@ WORKDIR /usr/local/src/pango/pango-1.42.4
 RUN meson _build
 RUN ninja -C _build
 RUN ninja -C _build install
-RUN echo "PKG_CONFIG_PATH=/usr/local/lib/x86_64-linux-gnu/pkgconfig:$PKG_CONFIG_PATH" >>  ~/.bashrc
-RUN echo "LD_LIBRARY_PATH=/usr/local/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH" >>  ~/.bashrc
+ENV PKG_CONFIG_PATH "/usr/local/lib/x86_64-linux-gnu/pkgconfig:$PKG_CONFIG_PATH"
+ENV LD_LIBRARY_PATH "/usr/local/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH"
 RUN ldconfig
 
 WORKDIR /usr/local/src/glib
@@ -43,8 +42,8 @@ WORKDIR /usr/local/src/gtk/gtk+-3.24.20
 RUN ./configure --prefix=/opt/gtk
 RUN make -j$(nproc)
 RUN make install
-RUN echo "PKG_CONFIG_PATH=/opt/gtk/lib/pkgconfig:$PKG_CONFIG_PATH" >>  ~/.bashrc
-RUN echo "LD_LIBRARY_PATH=/opt/gtk/lib:$LD_LIBRARY_PATH" >>  ~/.bashrc
+ENV PKG_CONFIG_PATH "/opt/gtk/lib/x86_64-linux-gnu/pkgconfig:$PKG_CONFIG_PATH"
+ENV LD_LIBRARY_PATH "/opt/gtk/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH"
 RUN ldconfig
 
 WORKDIR /usr/local/src/gobject
@@ -54,11 +53,12 @@ WORKDIR /usr/local/src/gobject/gobject-introspection-1.64.1
 RUN meson _build --prefix=/opt/gtk
 RUN ninja -C _build
 RUN ninja -C _build install
-RUN echo "PKG_CONFIG_PATH=/opt/gtk/lib64/pkgconfig:$PKG_CONFIG_PATH" >>  ~/.bashrc
-RUN echo "LD_LIBRARY_PATH=/opt/gtk/lib64:$LD_LIBRARY_PATH" >>  ~/.bashrc
-RUN echo "export GI_TYPELIB_PATH=/opt/gtk/lib64/girepository-1.0:/opt/gtk/lib/girepository-1.0:/usr/lib64/girepository-1.0" >>  ~/.bashrc
+ENV PKG_CONFIG_PATH "/opt/gtk/lib/pkgconfig:$PKG_CONFIG_PATH"
+ENV LD_LIBRARY_PATH "/opt/gtk/lib:$LD_LIBRARY_PATH"
+ENV GI_TYPELIB_PATH "/opt/gtk/lib/x86_64-linux-gnu/girepository-1.0:/opt/gtk/lib/girepository-1.0:/usr/local/lib/x86_64-linux-gnu/girepository-1.0:/usr/lib/x86_64-linux-gnu/girepository-1.0"
 RUN ldconfig
 
+RUN ls /opt/gtk/lib
 
 
 COPY . /usr/src/zegarek
