@@ -7,6 +7,7 @@ RUN apt update &&\
     # add-apt-repository ppa:savoury1/backports &&\
     eatmydata apt -y install gcc build-essential cmake gettext wget curl librsvg2-bin git libgtk-3-dev \
     libgirepository1.0-dev file libcanberra-gtk3-dev libmount-dev \
+    libegl1-mesa-dev libglu1-mesa-dev freeglut3-dev mesa-common-dev \
     ninja-build/xenial-backports python3-pip flex bison python3-dev libfribidi-dev libharfbuzz-dev &&\
     rm -rf /var/lib/apt/lists/* &&\
     pip3 install meson &&\
@@ -14,6 +15,17 @@ RUN apt update &&\
     chmod +x ./choosenim.sh &&\
     ./choosenim.sh -y
 ENV PATH "/root/.nimble/bin:$PATH"
+
+WORKDIR /usr/local/src/libepoxy
+RUN wget https://github.com/anholt/libepoxy/releases/download/1.4.1/libepoxy-1.4.1.tar.xz
+RUN tar xvf libepoxy-1.4.1.tar.xz
+WORKDIR /usr/local/src/libepoxy/libepoxy-1.4.1
+RUN meson _build
+RUN ninja -C _build
+RUN ninja -C _build install
+ENV PKG_CONFIG_PATH "/usr/local/lib/x86_64-linux-gnu/pkgconfig:$PKG_CONFIG_PATH"
+ENV LD_LIBRARY_PATH "/usr/local/lib/x86_64-linux-gnu/:$LD_LIBRARY_PATH"
+RUN ldconfig
 
 WORKDIR /usr/local/src/harfbuzz
 RUN wget https://github.com/harfbuzz/harfbuzz/releases/download/1.4.2/harfbuzz-1.4.2.tar.bz2
