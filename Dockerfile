@@ -1,12 +1,13 @@
-FROM centos:6
+FROM ubuntu:18.04
 
-RUN yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm centos-release-scl &&\
-    yum -y install gcc gettext  wget librsvg2-tools git gtk3-devel \
-    gobject-introspection-devel file libcanberra-gtk3 libmount-devel \
-    devtoolset-8 ninja-build python3-pip flex bison python3-devel &&\
-    yum clean all &&\
-    rm -rf /var/cache/yum &&\
-    echo 'source scl_source enable devtoolset-8 ' >> ~/.bashrc &&\
+RUN apt update &&\
+    apt install -y --no-install-recommends eatmydata software-properties-common &&\
+    # add-apt-repository -u ppa:savoury1/fonts &&\
+    # add-apt-repository -u ppa:ubuntu-toolchain-r/test &&\
+    eatmydata apt -y install gcc build-essential cmake gettext wget curl librsvg2-bin git libgtk-3-dev \
+    libgirepository1.0-dev file libcanberra-gtk3-dev libmount-dev \
+    ninja-build python3-pip flex bison python3-dev libfribidi-dev libharfbuzz-dev &&\
+    rm -rf /var/lib/apt/lists/* &&\
     pip3 install meson &&\
     curl https://nim-lang.org/choosenim/init.sh -sSf > choosenim.sh &&\
     chmod +x ./choosenim.sh &&\
@@ -14,17 +15,28 @@ RUN yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.n
     echo 'export PATH=/root/.nimble/bin:$PATH' >> ~/.bashrc
 SHELL ["/bin/bash", "-c", "-l"]
 
+WORKDIR /usr/local/src/pango
+RUN wget http://ftp.gnome.org/pub/GNOME/sources/pango/1.42/pango-1.42.4.tar.xz
+RUN tar xvfJ pango-1.42.4.tar.xz
+WORKDIR /usr/local/src/pango/pango-1.42.4
+RUN meson _build
+RUN ninja -C _build
+RUN ninja -C _build install
+RUN echo "PKG_CONFIG_PATH=/usr/local/lib/x86_64-linux-gnu/pkgconfig:$PKG_CONFIG_PATH" >>  ~/.bashrc
+RUN echo "LD_LIBRARY_PATH=/usr/local/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH" >>  ~/.bashrc
+RUN ldconfig
+
 WORKDIR /usr/local/src/glib
 RUN wget https://download.gnome.org/sources/glib/2.60/glib-2.60.7.tar.xz
 RUN tar xvfJ glib-2.60.7.tar.xz
 WORKDIR /usr/local/src/glib/glib-2.60.7
 RUN meson _build
-RUN ninja-build -C _build
-RUN ninja-build -C _build install
-RUN echo "PKG_CONFIG_PATH=/usr/local/lib64/pkgconfig:$PKG_CONFIG_PATH" >>  ~/.bashrc
-RUN echo "LD_LIBRARY_PATH=/usr/local/lib64:$LD_LIBRARY_PATH" >>  ~/.bashrc
+RUN ninja -C _build
+RUN ninja -C _build install
+RUN ldconfig
 
 WORKDIR /usr/local/src/gtk
+RUN echo $LD_LIBRARY_PATH
 RUN wget https://download.gnome.org/sources/gtk+/3.24/gtk+-3.24.20.tar.xz
 RUN tar xvfJ gtk+-3.24.20.tar.xz
 WORKDIR /usr/local/src/gtk/gtk+-3.24.20
@@ -33,17 +45,19 @@ RUN make -j$(nproc)
 RUN make install
 RUN echo "PKG_CONFIG_PATH=/opt/gtk/lib/pkgconfig:$PKG_CONFIG_PATH" >>  ~/.bashrc
 RUN echo "LD_LIBRARY_PATH=/opt/gtk/lib:$LD_LIBRARY_PATH" >>  ~/.bashrc
+RUN ldconfig
 
 WORKDIR /usr/local/src/gobject
 RUN wget https://download.gnome.org/sources/gobject-introspection/1.64/gobject-introspection-1.64.1.tar.xz
 RUN tar xvfJ gobject-introspection-1.64.1.tar.xz
 WORKDIR /usr/local/src/gobject/gobject-introspection-1.64.1
 RUN meson _build --prefix=/opt/gtk
-RUN ninja-build -C _build
-RUN ninja-build -C _build install
+RUN ninja -C _build
+RUN ninja -C _build install
 RUN echo "PKG_CONFIG_PATH=/opt/gtk/lib64/pkgconfig:$PKG_CONFIG_PATH" >>  ~/.bashrc
 RUN echo "LD_LIBRARY_PATH=/opt/gtk/lib64:$LD_LIBRARY_PATH" >>  ~/.bashrc
 RUN echo "export GI_TYPELIB_PATH=/opt/gtk/lib64/girepository-1.0:/opt/gtk/lib/girepository-1.0:/usr/lib64/girepository-1.0" >>  ~/.bashrc
+RUN ldconfig
 
 RUN nimble -y install gintro
 
