@@ -143,14 +143,15 @@ task appimage, "Build AppImage":
     writeFile("libs.blacklist", blacklistedLibs.join("\n") & "\n")
 
   run fmt"VERSION={version} ./linuxdeploy/AppRun  --appdir AppDir"
-  run """for i in `cat libs.blacklist`; do rm AppDir/usr/lib/"$i"; done"""
-  run "cp /lib/x86_64-linux-gnu/libz.so.1 AppDir/usr/lib/"
-  run "cp /usr/local/lib/x86_64-linux-gnu/libgio-2.0.so.0 AppDir/usr/lib/"
-  run "cp /usr/local/lib/x86_64-linux-gnu/libpango-1.0.so.0 AppDir/usr/lib/"
-  run "cp /usr/local/lib/x86_64-linux-gnu/libpangoft2-1.0.so.0 AppDir/usr/lib/"
-  run "cp /usr/lib/x86_64-linux-gnu/libfreetype.so.6 AppDir/usr/lib/"
-  run "cp /usr/lib/x86_64-linux-gnu/libharfbuzz.so.0 AppDir/usr/lib/"
-  run "cp /usr/local/lib/x86_64-linux-gnu/libglib-2.0.so.0 AppDir/usr/lib/"
+  # run """for i in `cat libs.blacklist`; do rm AppDir/usr/lib/"$i"; done"""
+  # run "cp /lib/x86_64-linux-gnu/libz.so.1 AppDir/usr/lib/"
+  # run "cp /usr/local/lib/x86_64-linux-gnu/libgio-2.0.so.0 AppDir/usr/lib/"
+  # run "cp /usr/local/lib/x86_64-linux-gnu/libpango-1.0.so.0 AppDir/usr/lib/"
+  # run "cp /usr/local/lib/x86_64-linux-gnu/libpangoft2-1.0.so.0 AppDir/usr/lib/"
+  # run "cp /usr/lib/x86_64-linux-gnu/libfreetype.so.6 AppDir/usr/lib/"
+  # run "cp /usr/lib/x86_64-linux-gnu/libfontconfig.so.1 AppDir/usr/lib/"
+  # run "cp /usr/lib/x86_64-linux-gnu/libharfbuzz.so.0 AppDir/usr/lib/"
+  # run "cp /usr/local/lib/x86_64-linux-gnu/libglib-2.0.so.0 AppDir/usr/lib/"
 
   # run "xargs -i cp -L {} AppDir/usr/lib/ < requiredLibs"
 
