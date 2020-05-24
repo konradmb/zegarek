@@ -6,7 +6,7 @@ RUN apt update &&\
     # add-apt-repository -u ppa:ubuntu-toolchain-r/test &&\
     # add-apt-repository ppa:savoury1/backports &&\
     eatmydata apt -y install gcc build-essential cmake gettext wget curl librsvg2-bin git libgtk-3-dev \
-    libgirepository1.0-dev file libcanberra-gtk3-dev libmount-dev \
+    libgirepository1.0-dev gir1.2-rsvg-2.0 file libcanberra-gtk3-dev libmount-dev \
     libegl1-mesa-dev libglu1-mesa-dev freeglut3-dev mesa-common-dev \
     ninja-build/xenial-backports python3-pip flex bison python3-dev libfribidi-dev libharfbuzz-dev &&\
     rm -rf /var/lib/apt/lists/* &&\
