@@ -4,7 +4,7 @@ RUN apt update &&\
     apt install -y --no-install-recommends eatmydata software-properties-common &&\
     # add-apt-repository -u ppa:savoury1/fonts &&\
     # add-apt-repository -u ppa:ubuntu-toolchain-r/test &&\
-    add-apt-repository ppa:savoury1/backports &&\
+    # add-apt-repository ppa:savoury1/backports &&\
     eatmydata apt -y install gcc build-essential cmake gettext wget curl librsvg2-bin git libgtk-3-dev \
     libgirepository1.0-dev file libcanberra-gtk3-dev libmount-dev \
     ninja-build/xenial-backports python3-pip flex bison python3-dev libfribidi-dev libharfbuzz-dev &&\
@@ -15,15 +15,15 @@ RUN apt update &&\
     ./choosenim.sh -y
 ENV PATH "/root/.nimble/bin:$PATH"
 
-WORKDIR /usr/local/src/pango
-RUN wget http://ftp.gnome.org/pub/GNOME/sources/pango/1.42/pango-1.42.4.tar.xz
-RUN tar xvfJ pango-1.42.4.tar.xz
-WORKDIR /usr/local/src/pango/pango-1.42.4
-RUN meson _build
-RUN ninja -C _build
-RUN ninja -C _build install
-ENV PKG_CONFIG_PATH "/usr/local/lib/x86_64-linux-gnu/pkgconfig:$PKG_CONFIG_PATH"
-ENV LD_LIBRARY_PATH "/usr/local/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH"
+WORKDIR /usr/local/src/harfbuzz
+RUN wget https://github.com/harfbuzz/harfbuzz/releases/download/1.4.2/harfbuzz-1.4.2.tar.bz2
+RUN tar xvf harfbuzz-1.4.2.tar.bz2
+WORKDIR /usr/local/src/harfbuzz/harfbuzz-1.4.2
+RUN ./configure
+RUN make -j$(nproc)
+RUN make install
+ENV PKG_CONFIG_PATH "/usr/local/lib/pkgconfig:$PKG_CONFIG_PATH"
+ENV LD_LIBRARY_PATH "/usr/local/lib/:$LD_LIBRARY_PATH"
 RUN ldconfig
 
 WORKDIR /usr/local/src/glib
@@ -33,6 +33,19 @@ WORKDIR /usr/local/src/glib/glib-2.60.7
 RUN meson _build
 RUN ninja -C _build
 RUN ninja -C _build install
+ENV PKG_CONFIG_PATH "/usr/local/lib/x86_64-linux-gnu/pkgconfig:$PKG_CONFIG_PATH"
+ENV LD_LIBRARY_PATH "/usr/local/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH"
+RUN ldconfig
+
+WORKDIR /usr/local/src/pango
+RUN wget http://ftp.gnome.org/pub/GNOME/sources/pango/1.42/pango-1.42.4.tar.xz
+RUN tar xvfJ pango-1.42.4.tar.xz
+WORKDIR /usr/local/src/pango/pango-1.42.4
+RUN meson _build
+RUN ninja -C _build
+RUN ninja -C _build install
+ENV PKG_CONFIG_PATH "/usr/local/lib/x86_64-linux-gnu/pkgconfig:$PKG_CONFIG_PATH"
+ENV LD_LIBRARY_PATH "/usr/local/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH"
 RUN ldconfig
 
 WORKDIR /usr/local/src/gtk
