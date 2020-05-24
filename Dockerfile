@@ -59,7 +59,7 @@ RUN echo "LD_LIBRARY_PATH=/opt/gtk/lib64:$LD_LIBRARY_PATH" >>  ~/.bashrc
 RUN echo "export GI_TYPELIB_PATH=/opt/gtk/lib64/girepository-1.0:/opt/gtk/lib/girepository-1.0:/usr/lib64/girepository-1.0" >>  ~/.bashrc
 RUN ldconfig
 
-RUN nimble -y install gintro
+
 
 COPY . /usr/src/zegarek
 WORKDIR /usr/src/zegarek
