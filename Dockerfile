@@ -1,6 +1,6 @@
-FROM centos:7
+FROM centos:6
 
-RUN yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm centos-release-scl &&\
+RUN yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm centos-release-scl &&\
     yum -y install gcc gettext  wget librsvg2-tools git gtk3-devel \
     gobject-introspection-devel file libcanberra-gtk3 libmount-devel \
     devtoolset-8 ninja-build python3-pip flex bison python3-devel &&\
