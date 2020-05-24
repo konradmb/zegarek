@@ -45,8 +45,8 @@ WORKDIR /usr/local/src/glib/glib-2.60.7
 RUN meson _build
 RUN ninja -C _build
 RUN ninja -C _build install
-ENV PKG_CONFIG_PATH "/usr/local/lib/x86_64-linux-gnu/pkgconfig:$PKG_CONFIG_PATH"
-ENV LD_LIBRARY_PATH "/usr/local/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH"
+# ENV PKG_CONFIG_PATH "/usr/local/lib/x86_64-linux-gnu/pkgconfig:$PKG_CONFIG_PATH"
+# ENV LD_LIBRARY_PATH "/usr/local/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH"
 RUN ldconfig
 
 WORKDIR /usr/local/src/pango
@@ -56,8 +56,8 @@ WORKDIR /usr/local/src/pango/pango-1.42.4
 RUN meson _build
 RUN ninja -C _build
 RUN ninja -C _build install
-ENV PKG_CONFIG_PATH "/usr/local/lib/x86_64-linux-gnu/pkgconfig:$PKG_CONFIG_PATH"
-ENV LD_LIBRARY_PATH "/usr/local/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH"
+# ENV PKG_CONFIG_PATH "/usr/local/lib/x86_64-linux-gnu/pkgconfig:$PKG_CONFIG_PATH"
+# ENV LD_LIBRARY_PATH "/usr/local/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH"
 RUN ldconfig
 
 WORKDIR /usr/local/src/gtk
