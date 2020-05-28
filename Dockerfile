@@ -39,12 +39,12 @@ ENV LD_LIBRARY_PATH "/usr/local/lib/:$LD_LIBRARY_PATH"
 RUN ldconfig
 
 WORKDIR /usr/local/src/glib
-RUN wget https://download.gnome.org/sources/glib/2.50/glib-2.50.3.tar.xz
-RUN tar xvfJ glib-2.50.3.tar.xz
-WORKDIR /usr/local/src/glib/glib-2.50.3
-RUN ./configure
-RUN make -j$(nproc)
-RUN make install
+RUN wget https://download.gnome.org/sources/glib/2.60/glib-2.60.7.tar.xz
+RUN tar xvfJ glib-2.60.7.tar.xz
+WORKDIR /usr/local/src/glib/glib-2.60.7
+RUN meson _build
+RUN ninja -C _build
+RUN ninja -C _build install
 # ENV PKG_CONFIG_PATH "/usr/local/lib/x86_64-linux-gnu/pkgconfig:$PKG_CONFIG_PATH"
 # ENV LD_LIBRARY_PATH "/usr/local/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH"
 RUN ldconfig
