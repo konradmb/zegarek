@@ -1,6 +1,6 @@
 # Package
 
-version       = "0.4.1"
+version       = "0.4.2"
 author        = "konradmb"
 description   = "A simple clock with milisecond resolution"
 license       = "GPL-3.0"
@@ -23,8 +23,11 @@ from os import splitFile, `/`
 
 import macros
 
+template runGorge(cmd: string): string =
+  gorge("cd " & system.getCurrentDir() & " && " & cmd)
+
 template run(cmd: string) =
-  echo gorge("cd " & system.getCurrentDir() & " && " & cmd)
+  echo runGorge(cmd)
 
 proc convertImage(filePath: string) =
   let filename = filePath.splitFile().name
@@ -39,6 +42,28 @@ proc getPackageName(): string =
     return packageName
   else:
     return "zegarek"
+
+proc downloadAndExtractAppImage(url: string, outputDir: string) =
+  let filename = runGorge fmt"""wget -cnv {url} 2>&1 |cut -d\" -f2"""
+  run fmt"""
+    chmod +x {filename} &&
+    printf '\x00' | dd bs=1 seek=8 count=1 conv=notrunc of={filename} &&
+    ./{filename} --appimage-extract
+    mv ./squashfs-root {outputDir}
+  """
+
+macro repeatProc(procVar: untyped, args: varargs[untyped]): untyped =
+  result = newNimNode(nnkStmtList)
+  for arg in args:
+    let a = quote do:
+      `procVar`(`arg`)
+    result.add(a)
+
+template rmDir(dirs: varargs[string]) =
+  repeatProc rmDir, dirs
+
+template rmFile(files: varargs[string]) =
+  repeatProc rmFile, files
 
 task updateL10n, "Update .pot and .po localisation files":
   mkdir "build"
@@ -75,13 +100,8 @@ task appimage, "Build AppImage":
   mkdir("build/AppDir")
   cd("build")
 
-  run """
-    wget -c https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage &&
-    chmod +x linuxdeploy-x86_64.AppImage &&
-    printf '\x00' | dd bs=1 seek=8 count=1 conv=notrunc of=linuxdeploy-x86_64.AppImage &&
-    ./linuxdeploy-x86_64.AppImage --appimage-extract
-    ./squashfs-root/AppRun --appdir AppDir
-  """
+  downloadAndExtractAppImage("https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage ", "linuxdeploy")
+  run "./linuxdeploy/AppRun --appdir AppDir"
 
   run "nim c -d:release -d:nimDebugDlOpen -o:AppDir/usr/bin/zegarek ../src/zegarek.nim"
 
@@ -90,52 +110,65 @@ task appimage, "Build AppImage":
   # Fix AppImage thumbnail creation
   cpFile("AppDir/usr/share/icons/hicolor/256x256/apps/zegarek-icon.png", "AppDir/zegarek-icon.png")
   run "cd AppDir && ln -s zegarek-icon.png .DirIcon"
+
+  writeFile("AppDir/AppRun","""
+#!/bin/sh
+SELF=$(readlink -f "$0")
+HERE=${SELF%/*}
+export PATH="${HERE}/usr/bin/:${HERE}/usr/sbin/:${HERE}/usr/games/:${HERE}/bin/:${HERE}/sbin/${PATH:+:$PATH}"
+export LD_LIBRARY_PATH="${HERE}/usr/lib/:${HERE}/usr/lib/i386-linux-gnu/:${HERE}/usr/lib/x86_64-linux-gnu/:${HERE}/usr/lib32/:${HERE}/usr/lib64/:${HERE}/lib/:${HERE}/lib/i386-linux-gnu/:${HERE}/lib/x86_64-linux-gnu/:${HERE}/lib32/:${HERE}/lib64/${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+export PYTHONPATH="${HERE}/usr/share/pyshared/${PYTHONPATH:+:$PYTHONPATH}"
+# export XDG_DATA_DIRS="${HERE}/usr/share/${XDG_DATA_DIRS:+:$XDG_DATA_DIRS}"
+export PERLLIB="${HERE}/usr/share/perl5/:${HERE}/usr/lib/perl5/${PERLLIB:+:$PERLLIB}"
+export GSETTINGS_SCHEMA_DIR="${HERE}/usr/share/glib-2.0/schemas/${GSETTINGS_SCHEMA_DIR:+:$GSETTINGS_SCHEMA_DIR}"
+export QT_PLUGIN_PATH="${HERE}/usr/lib/qt4/plugins/:${HERE}/usr/lib/i386-linux-gnu/qt4/plugins/:${HERE}/usr/lib/x86_64-linux-gnu/qt4/plugins/:${HERE}/usr/lib32/qt4/plugins/:${HERE}/usr/lib64/qt4/plugins/:${HERE}/usr/lib/qt5/plugins/:${HERE}/usr/lib/i386-linux-gnu/qt5/plugins/:${HERE}/usr/lib/x86_64-linux-gnu/qt5/plugins/:${HERE}/usr/lib32/qt5/plugins/:${HERE}/usr/lib64/qt5/plugins/${QT_PLUGIN_PATH:+:$QT_PLUGIN_PATH}"
+EXEC=$(grep -e '^Exec=.*' "${HERE}"/*.desktop | head -n 1 | cut -d "=" -f 2 | cut -d " " -f 1)
+exec "${EXEC}" "$@"
+  """)
+  run "chmod +x AppDir/AppRun"
   
   cpFile("../res/zegarek-icon.svg", "AppDir/usr/share/icons/hicolor/scalable/apps/zegarek-icon.svg")
   cpFile("../res/zegarek.desktop", "AppDir/usr/share/applications/zegarek.desktop")
+  cpFile("../res/zegarek.desktop", "AppDir/zegarek.desktop")
   cpFile("../src/main.css", "AppDir/usr/bin/main.css")
   cpFile("../src/main.glade", "AppDir/usr/bin/main.glade")
   cpDir("locale", "AppDir/usr/share/locale")
-  if existsFile("requiredLibs"):
-    run "wget -c https://github.com/AppImage/pkg2appimage/raw/master/excludelist"
-    var requiredLibs = readFile("requiredLibs").splitLines().filterIt(not it.contains(">"))
-    for excludedLib in readFile("excludelist").splitLines():
-      # Ignore comments and empty lines
-      if excludedLib =~ peg"^\s*'#'.*" or excludedLib =~ peg"^\s*$":
-        continue
-      let excludedLib = excludedLib.split("#")[0].replace(" ", "")
 
-      requiredLibs = requiredLibs.filterIt(not it.contains(excludedLib))
+  run fmt"VERSION={version} ./linuxdeploy/AppRun  --appdir AppDir"
+
+  if existsFile("requiredLibs"):
+    var requiredLibs: seq[string]
+    for line in readFile("requiredLibs").splitLines():
+      # Ignore comments, empty lines and >
+      if line =~ peg"^\s*'#'.*" or line =~ peg"^\s*$" or line.contains(">"):
+        continue
+      requiredLibs.add(line.split("#")[0].replace(" ", ""))
     writeFile("requiredLibsFiltered", requiredLibs.join("\n"))
-    echo "Filtered libs: ", requiredLibs
+    echo "Libs to copy: ", requiredLibs
     run "xargs -i cp -L {} AppDir/usr/lib/ < requiredLibsFiltered"
     # Silence canberra error
     var requiredSpecialLibs = readFile("requiredLibs").splitLines().filterIt(it.contains(">"))
     for lib in requiredSpecialLibs:
-      echo fmt"Copying {lib}"
+      echo fmt"Copying additional lib: {lib}"
       let splitLib = lib.replace(" ", "").split(">")
       mkdir "AppDir/usr/lib"/splitLib[1].splitFile().dir
       cpFile splitLib[0], "AppDir/usr/lib"/splitLib[1]
 
-  run fmt"VERSION={version} ./squashfs-root/AppRun  --appdir AppDir --output appimage"
+  if existsFile("excludelist.local"):
+    for excludedLib in readFile("excludelist.local").splitLines():
+      if excludedLib =~ peg"^\s*'#'.*" or excludedLib =~ peg"^\s*$":
+        continue
+      echo "Removing ", excludedLib
+      rmFile "AppDir/usr/lib"/excludedLib
+
+
+  downloadAndExtractAppImage("https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage", "appimagetool")
+  run fmt"VERSION={version} ./appimagetool/AppRun AppDir"
 
 task appimageDocker, "Build AppImage in Docker":
   run "docker build -t zegarek ."
   mkdir "build"
   run fmt"docker run -i --rm zegarek sh -c 'cd build && tar -c Zegarek*AppImage' | tar -x -C build/"
-
-macro repeatProc(procVar: untyped, args: varargs[untyped]): untyped =
-  result = newNimNode(nnkStmtList)
-  for arg in args:
-    let a = quote do:
-      `procVar`(`arg`)
-    result.add(a)
-
-template rmDir(dirs: varargs[string]) =
-  repeatProc rmDir, dirs
-
-template rmFile(files: varargs[string]) =
-  repeatProc rmFile, files
 
 task clean, "Clean build directory":
   cd("build")
