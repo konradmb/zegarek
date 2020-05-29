@@ -1,8 +1,10 @@
-name: Build
+name: Build and release
 
 on:
   push:
     branches: [ master ]
+    tags:
+      - v*
   pull_request:
     branches: [ master ]
 
@@ -30,3 +32,22 @@ jobs:
       with:
         name: AppImage
         path: build/Zegarek*.AppImage
+
+    - name: Set ref
+      id: set_ref
+      run: |
+        echo $GITHUB_REF
+        FILTERED_REF=`echo $GITHUB_REF | sed "s?refs/tags/v??"`
+        echo "::set-env name=FILTERED_REF::$FILTERED_REF"
+      
+    - name: Release
+      uses: softprops/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/tags/v')
+      with:
+        files: |
+          build/Zegarek*.AppImage
+        draft: false
+        prerelease: false
+        name: Zegarek ${{ env.FILTERED_REF }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
