@@ -2,9 +2,6 @@ FROM ubuntu:16.04
 
 RUN apt update &&\
     apt install -y --no-install-recommends eatmydata software-properties-common &&\
-    # add-apt-repository -u ppa:savoury1/fonts &&\
-    # add-apt-repository -u ppa:ubuntu-toolchain-r/test &&\
-    # add-apt-repository ppa:savoury1/backports &&\
     eatmydata apt -y install gcc build-essential cmake gettext wget curl librsvg2-bin git libgtk-3-dev \
     libgirepository1.0-dev gir1.2-rsvg-2.0 file libcanberra-gtk3-dev libmount-dev \
     libegl1-mesa-dev libglu1-mesa-dev freeglut3-dev mesa-common-dev \
@@ -45,8 +42,6 @@ WORKDIR /usr/local/src/glib/glib-2.60.7
 RUN meson _build
 RUN ninja -C _build
 RUN ninja -C _build install
-# ENV PKG_CONFIG_PATH "/usr/local/lib/x86_64-linux-gnu/pkgconfig:$PKG_CONFIG_PATH"
-# ENV LD_LIBRARY_PATH "/usr/local/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH"
 RUN ldconfig
 
 WORKDIR /usr/local/src/pango
@@ -56,8 +51,6 @@ WORKDIR /usr/local/src/pango/pango-1.42.4
 RUN meson _build
 RUN ninja -C _build
 RUN ninja -C _build install
-# ENV PKG_CONFIG_PATH "/usr/local/lib/x86_64-linux-gnu/pkgconfig:$PKG_CONFIG_PATH"
-# ENV LD_LIBRARY_PATH "/usr/local/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH"
 RUN ldconfig
 
 WORKDIR /usr/local/src/gtk

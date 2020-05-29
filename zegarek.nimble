@@ -111,7 +111,6 @@ task appimage, "Build AppImage":
   cpFile("AppDir/usr/share/icons/hicolor/256x256/apps/zegarek-icon.png", "AppDir/zegarek-icon.png")
   run "cd AppDir && ln -s zegarek-icon.png .DirIcon"
 
-  # run "wget https://github.com/AppImage/AppImageKit/raw/master/resources/AppRun -O AppDir/AppRun"
   writeFile("AppDir/AppRun","""
 #!/bin/sh
 SELF=$(readlink -f "$0")
@@ -161,40 +160,6 @@ exec "${EXEC}" "$@"
         continue
       echo "Removing ", excludedLib
       rmFile "AppDir/usr/lib"/excludedLib
-  # run fmt"VERSION={version} ./linuxdeploy/AppRun  --appdir AppDir --output appimage"
-
-  # run """for i in `cat libs.blacklist`; do rm AppDir/usr/lib/"$i"; done"""
-  # run "cp /lib/x86_64-linux-gnu/libz.so.1 AppDir/usr/lib/"
-  # run "cp /usr/lib/x86_64-linux-gnu/libfreetype.so.6 AppDir/usr/lib/"
-  # run "cp /usr/lib/x86_64-linux-gnu/libfontconfig.so.1 AppDir/usr/lib/"
-  # run "cp /usr/lib/x86_64-linux-gnu/libharfbuzz.so.0 AppDir/usr/lib/"
-
-  # run "cp /usr/local/lib/x86_64-linux-gnu/libgio-2.0.so.0 AppDir/usr/lib/"
-  # run "cp /usr/local/lib/x86_64-linux-gnu/libpango* AppDir/usr/lib/"
-  # # run "cp /usr/local/lib/x86_64-linux-gnu/libpango-1.0.so.0 AppDir/usr/lib/"
-  # # run "cp /usr/local/lib/x86_64-linux-gnu/libpangoft2-1.0.so.0 AppDir/usr/lib/"
-  # # run "cp /usr/local/lib/x86_64-linux-gnu/libpangoxft-1.0.so.0 AppDir/usr/lib/"
-  # run "cp /usr/local/lib/libharfbuzz.so.0 AppDir/usr/lib/"
-  # run "cp /usr/local/lib/x86_64-linux-gnu/libglib-2.0.so.0 AppDir/usr/lib/"
-  # run "cp /usr/lib/x86_64-linux-gnu/libgdk_pixbuf-2.0.so.0 AppDir/usr/lib/"
-
-  # run "xargs -i cp -L {} AppDir/usr/lib/ < requiredLibs"
-
-  # run "cp /opt/gtk/lib/libgtk-3.so.0 AppDir/usr/lib/"
-  # run "cp /opt/gtk/lib/libgdk-3.so.0 AppDir/usr/lib/"
-  # run "cp /usr/local/lib/x86_64-linux-gnu/libepoxy.so.0 AppDir/usr/lib/"
-
-  # run """
-  # export APPDIR=AppDir
-  # gdk_pixbuf_moduledir="$(pkg-config --variable=gdk_pixbuf_moduledir gdk-pixbuf-2.0)"
-  # gdk_pixbuf_cache_file="$(pkg-config --variable=gdk_pixbuf_cache_file gdk-pixbuf-2.0)"
-  # gdk_pixbuf_libdir_bundle="lib/gdk-pixbuf-2.0"
-  # gdk_pixbuf_cache_file_bundle="$APPDIR/usr/${gdk_pixbuf_libdir_bundle}/loaders.cache"
-  # mkdir -p "$APPDIR/usr/${gdk_pixbuf_libdir_bundle}"
-  # cp -a "$gdk_pixbuf_moduledir" "$APPDIR/usr/${gdk_pixbuf_libdir_bundle}"
-  # cp -a "$gdk_pixbuf_cache_file" "$APPDIR/usr/${gdk_pixbuf_libdir_bundle}"
-  # sed -i -e "s|${gdk_pixbuf_moduledir}/||g" "$gdk_pixbuf_cache_file_bundle"
-  # """
 
 
   downloadAndExtractAppImage("https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage", "appimagetool")
