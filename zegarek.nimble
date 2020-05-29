@@ -111,7 +111,21 @@ task appimage, "Build AppImage":
   cpFile("AppDir/usr/share/icons/hicolor/256x256/apps/zegarek-icon.png", "AppDir/zegarek-icon.png")
   run "cd AppDir && ln -s zegarek-icon.png .DirIcon"
 
-  run "wget https://github.com/AppImage/AppImageKit/raw/master/resources/AppRun -O AppDir/AppRun"
+  # run "wget https://github.com/AppImage/AppImageKit/raw/master/resources/AppRun -O AppDir/AppRun"
+  writeFile("AppDir/AppRun","""
+#!/bin/sh
+SELF=$(readlink -f "$0")
+HERE=${SELF%/*}
+export PATH="${HERE}/usr/bin/:${HERE}/usr/sbin/:${HERE}/usr/games/:${HERE}/bin/:${HERE}/sbin/${PATH:+:$PATH}"
+export LD_LIBRARY_PATH="${HERE}/usr/lib/:${HERE}/usr/lib/i386-linux-gnu/:${HERE}/usr/lib/x86_64-linux-gnu/:${HERE}/usr/lib32/:${HERE}/usr/lib64/:${HERE}/lib/:${HERE}/lib/i386-linux-gnu/:${HERE}/lib/x86_64-linux-gnu/:${HERE}/lib32/:${HERE}/lib64/${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+export PYTHONPATH="${HERE}/usr/share/pyshared/${PYTHONPATH:+:$PYTHONPATH}"
+# export XDG_DATA_DIRS="${HERE}/usr/share/${XDG_DATA_DIRS:+:$XDG_DATA_DIRS}"
+export PERLLIB="${HERE}/usr/share/perl5/:${HERE}/usr/lib/perl5/${PERLLIB:+:$PERLLIB}"
+export GSETTINGS_SCHEMA_DIR="${HERE}/usr/share/glib-2.0/schemas/${GSETTINGS_SCHEMA_DIR:+:$GSETTINGS_SCHEMA_DIR}"
+export QT_PLUGIN_PATH="${HERE}/usr/lib/qt4/plugins/:${HERE}/usr/lib/i386-linux-gnu/qt4/plugins/:${HERE}/usr/lib/x86_64-linux-gnu/qt4/plugins/:${HERE}/usr/lib32/qt4/plugins/:${HERE}/usr/lib64/qt4/plugins/:${HERE}/usr/lib/qt5/plugins/:${HERE}/usr/lib/i386-linux-gnu/qt5/plugins/:${HERE}/usr/lib/x86_64-linux-gnu/qt5/plugins/:${HERE}/usr/lib32/qt5/plugins/:${HERE}/usr/lib64/qt5/plugins/${QT_PLUGIN_PATH:+:$QT_PLUGIN_PATH}"
+EXEC=$(grep -e '^Exec=.*' "${HERE}"/*.desktop | head -n 1 | cut -d "=" -f 2 | cut -d " " -f 1)
+exec "${EXEC}" "$@"
+  """)
   run "chmod +x AppDir/AppRun"
   
   cpFile("../res/zegarek-icon.svg", "AppDir/usr/share/icons/hicolor/scalable/apps/zegarek-icon.svg")
@@ -120,31 +134,26 @@ task appimage, "Build AppImage":
   cpFile("../src/main.css", "AppDir/usr/bin/main.css")
   cpFile("../src/main.glade", "AppDir/usr/bin/main.glade")
   cpDir("locale", "AppDir/usr/share/locale")
-  if existsFile("requiredLibs"):
-    run "wget -c https://github.com/AppImage/pkg2appimage/raw/master/excludelist"
-    var requiredLibs = readFile("requiredLibs").splitLines().filterIt(not it.contains(">"))
-    for excludedLib in readFile("excludelist").splitLines():
-      # Ignore comments and empty lines
-      if excludedLib =~ peg"^\s*'#'.*" or excludedLib =~ peg"^\s*$":
-        continue
-      let excludedLib = excludedLib.split("#")[0].replace(" ", "")
 
-      requiredLibs = requiredLibs.filterIt(not it.contains(excludedLib))
+  run fmt"VERSION={version} ./linuxdeploy/AppRun  --appdir AppDir"
+
+  if existsFile("requiredLibs"):
+    var requiredLibs: seq[string]
+    for line in readFile("requiredLibs").splitLines():
+      # Ignore comments, empty lines and >
+      if line =~ peg"^\s*'#'.*" or line =~ peg"^\s*$" or line.contains(">"):
+        continue
+      requiredLibs.add(line.split("#")[0].replace(" ", ""))
     writeFile("requiredLibsFiltered", requiredLibs.join("\n"))
-    echo "Filtered libs: ", requiredLibs
+    echo "Libs to copy: ", requiredLibs
     run "xargs -i cp -L {} AppDir/usr/lib/ < requiredLibsFiltered"
     # Silence canberra error
     var requiredSpecialLibs = readFile("requiredLibs").splitLines().filterIt(it.contains(">"))
     for lib in requiredSpecialLibs:
-      echo fmt"Copying {lib}"
+      echo fmt"Copying additional lib: {lib}"
       let splitLib = lib.replace(" ", "").split(">")
       mkdir "AppDir/usr/lib"/splitLib[1].splitFile().dir
       cpFile splitLib[0], "AppDir/usr/lib"/splitLib[1]
-    # Blacklist additional libraries
-    let blacklistedLibs = ["libmount.so.1", "libblkid.so.1", "libbsd.so.0", "libxcb-shm.so.0",
-      "libsystemd.so.0", "libgcrypt.so.20"]
-    writeFile("libs.blacklist", blacklistedLibs.join("\n") & "\n")
-  run fmt"VERSION={version} ./linuxdeploy/AppRun  --appdir AppDir"
 
   if existsFile("excludelist.local"):
     for excludedLib in readFile("excludelist.local").splitLines():
@@ -152,20 +161,40 @@ task appimage, "Build AppImage":
         continue
       echo "Removing ", excludedLib
       rmFile "AppDir/usr/lib"/excludedLib
-  run fmt"VERSION={version} ./linuxdeploy/AppRun  --appdir AppDir --output appimage"
+  # run fmt"VERSION={version} ./linuxdeploy/AppRun  --appdir AppDir --output appimage"
 
   # run """for i in `cat libs.blacklist`; do rm AppDir/usr/lib/"$i"; done"""
   # run "cp /lib/x86_64-linux-gnu/libz.so.1 AppDir/usr/lib/"
-  run "cp /usr/local/lib/x86_64-linux-gnu/libgio-2.0.so.0 AppDir/usr/lib/"
-  run "cp /usr/local/lib/x86_64-linux-gnu/libpango-1.0.so.0 AppDir/usr/lib/"
-  run "cp /usr/local/lib/x86_64-linux-gnu/libpangoft2-1.0.so.0 AppDir/usr/lib/"
-  run "cp /usr/local/lib/libharfbuzz.so.0 AppDir/usr/lib/"
   # run "cp /usr/lib/x86_64-linux-gnu/libfreetype.so.6 AppDir/usr/lib/"
   # run "cp /usr/lib/x86_64-linux-gnu/libfontconfig.so.1 AppDir/usr/lib/"
   # run "cp /usr/lib/x86_64-linux-gnu/libharfbuzz.so.0 AppDir/usr/lib/"
-  run "cp /usr/local/lib/x86_64-linux-gnu/libglib-2.0.so.0 AppDir/usr/lib/"
+
+  # run "cp /usr/local/lib/x86_64-linux-gnu/libgio-2.0.so.0 AppDir/usr/lib/"
+  # run "cp /usr/local/lib/x86_64-linux-gnu/libpango* AppDir/usr/lib/"
+  # # run "cp /usr/local/lib/x86_64-linux-gnu/libpango-1.0.so.0 AppDir/usr/lib/"
+  # # run "cp /usr/local/lib/x86_64-linux-gnu/libpangoft2-1.0.so.0 AppDir/usr/lib/"
+  # # run "cp /usr/local/lib/x86_64-linux-gnu/libpangoxft-1.0.so.0 AppDir/usr/lib/"
+  # run "cp /usr/local/lib/libharfbuzz.so.0 AppDir/usr/lib/"
+  # run "cp /usr/local/lib/x86_64-linux-gnu/libglib-2.0.so.0 AppDir/usr/lib/"
+  # run "cp /usr/lib/x86_64-linux-gnu/libgdk_pixbuf-2.0.so.0 AppDir/usr/lib/"
 
   # run "xargs -i cp -L {} AppDir/usr/lib/ < requiredLibs"
+
+  # run "cp /opt/gtk/lib/libgtk-3.so.0 AppDir/usr/lib/"
+  # run "cp /opt/gtk/lib/libgdk-3.so.0 AppDir/usr/lib/"
+  # run "cp /usr/local/lib/x86_64-linux-gnu/libepoxy.so.0 AppDir/usr/lib/"
+
+  # run """
+  # export APPDIR=AppDir
+  # gdk_pixbuf_moduledir="$(pkg-config --variable=gdk_pixbuf_moduledir gdk-pixbuf-2.0)"
+  # gdk_pixbuf_cache_file="$(pkg-config --variable=gdk_pixbuf_cache_file gdk-pixbuf-2.0)"
+  # gdk_pixbuf_libdir_bundle="lib/gdk-pixbuf-2.0"
+  # gdk_pixbuf_cache_file_bundle="$APPDIR/usr/${gdk_pixbuf_libdir_bundle}/loaders.cache"
+  # mkdir -p "$APPDIR/usr/${gdk_pixbuf_libdir_bundle}"
+  # cp -a "$gdk_pixbuf_moduledir" "$APPDIR/usr/${gdk_pixbuf_libdir_bundle}"
+  # cp -a "$gdk_pixbuf_cache_file" "$APPDIR/usr/${gdk_pixbuf_libdir_bundle}"
+  # sed -i -e "s|${gdk_pixbuf_moduledir}/||g" "$gdk_pixbuf_cache_file_bundle"
+  # """
 
 
   downloadAndExtractAppImage("https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage", "appimagetool")

@@ -97,26 +97,22 @@ RUN mkdir build
 RUN echo $'\
 /usr/lib/x86_64-linux-gnu/gtk-3.0/modules/libcanberra-gtk-module.so>gtk-3.0/modules/libcanberra-gtk-module.so\n\
 /usr/lib/x86_64-linux-gnu/gtk-3.0/modules/libcanberra-gtk3-module.so>gtk-3.0/modules/libcanberra-gtk3-module.so\n\
-/usr/local/lib/x86_64-linux-gnu/libglib-2.0.so.0\n\
-/usr/local/lib/x86_64-linux-gnu/libgobject-2.0.so.0\n\
-/usr/local/lib/x86_64-linux-gnu/libgmodule-2.0.so.0\n\
-/usr/local/lib/x86_64-linux-gnu/libgio-2.0.so.0\n\
-/usr/local/lib/libharfbuzz.so.0\n\
-/usr/local/lib/x86_64-linux-gnu/libpango-1.0.so.0\n\
-/usr/local/lib/x86_64-linux-gnu/libpangoft2-1.0.so.0\n\
-/usr/local/lib/x86_64-linux-gnu/libepoxy.so.0\n\
-/usr/local/lib/x86_64-linux-gnu/libpangocairo-1.0.so.0\n\
-/opt/gtk/lib/libgdk-3.so.0\n\
-/opt/gtk/lib/libgtk-3.so.0\n\
+/usr/lib/x86_64-linux-gnu/gtk-3.0/modules/libcanberra-gtk-module.so\n\
+/usr/lib/x86_64-linux-gnu/gtk-3.0/modules/libcanberra-gtk3-module.so\n\
 /usr/lib/x86_64-linux-gnu/librsvg-2.so.2\n\
-/usr/lib/x86_64-linux-gnu/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-svg.so\n\
-/usr/lib/x86_64-linux-gnu/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-png.so\n\
+/usr/local/lib/libharfbuzz.so.0\n\
+/usr/local/lib/x86_64-linux-gnu/libepoxy.so.0\n\
+/usr/local/lib/x86_64-linux-gnu/libgio-2.0.so.0\n\
+/usr/local/lib/x86_64-linux-gnu/libglib-2.0.so.0\n\
+/usr/local/lib/x86_64-linux-gnu/libpango-1.0.so.0\n\
+/usr/local/lib/x86_64-linux-gnu/libpangocairo-1.0.so.0\n\
+/usr/local/lib/x86_64-linux-gnu/libpangoft2-1.0.so.0\n\
+/usr/local/lib/x86_64-linux-gnu/libpangoxft-1.0.so.0\n\
+/opt/gtk/lib/libgtk-3.so.0\n\
+/opt/gtk/lib/libgdk-3.so.0\n\
 ' > build/requiredLibs
 RUN echo $'\
-libatk-bridge-2.0.so.0\n\
-#libpixbufloader-svg.so\n\
-#libpixbufloader-png.so\n\
-#librsvg-2.so.2\n\
+#empty
 ' > build/excludelist.local
 
 RUN gcc --version &&\
