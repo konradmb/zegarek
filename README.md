@@ -1,5 +1,7 @@
 # Zegarek
 
+![GitHub All Releases Downloads](https://img.shields.io/github/downloads/konradmb/zegarek/total?color=brightgreen)
+
 ![Zegarek's main window](res/screenshot.png)
 
 ## Download
