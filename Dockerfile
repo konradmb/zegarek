@@ -1,4 +1,4 @@
-FROM docker.pkg.github.com/konradmb/docker-gtk-compile/docker-gtk-compile:latest
+FROM konradmb/docker-gtk-compile
 
 RUN curl https://nim-lang.org/choosenim/init.sh -sSf > choosenim.sh &&\
     chmod +x ./choosenim.sh &&\
