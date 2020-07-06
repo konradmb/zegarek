@@ -170,6 +170,17 @@ task appimageDocker, "Build AppImage in Docker":
   mkdir "build"
   run fmt"docker run -i --rm zegarek sh -c 'cd build && tar -c Zegarek*AppImage' | tar -x -C build/"
 
+task windows, "Build Windows binary":
+  mkdir("build/Windows")
+  cd("build")
+  run "nim c -d:release -d:nimDebugDlOpen -d:mingw --cpu:amd64 -o:Windows/zegarek ../src/zegarek.nim"
+
+task windowsDocker, "Build Windows binary in Docker":
+  run "pwd"
+  run "docker build -t zegarek-windows -f ./Dockerfile-windows ."
+  mkdir "build"
+  run fmt"docker run -i --rm zegarek-windows sh -c 'cd build/Windows && tar -c *' | tar -x -C build/"
+
 task clean, "Clean build directory":
   cd("build")
   rmDir "AppDir", "locale", "squashfs-root"

@@ -1,0 +1,25 @@
+FROM konradmb/docker-gtk-crosscompile-windows
+
+RUN curl https://nim-lang.org/choosenim/init.sh -sSf > choosenim.sh &&\
+    chmod +x ./choosenim.sh &&\
+    ./choosenim.sh -y
+ENV PATH "/root/.nimble/bin:$PATH"
+
+RUN nimble -y install gintro
+
+COPY . /usr/src/zegarek
+WORKDIR /usr/src/zegarek
+
+SHELL [ "/bin/bash", "-c" ]
+
+RUN mkdir build
+
+RUN gcc --version &&\
+    nimble -y clean &&\ 
+    nimble -y build &&\
+    nimble -y windows
+
+# WHY????
+# RUN printf '\x00' | dd bs=1 seek=8 count=1 conv=notrunc of=`ls build/Zegarek*AppImage`
+
+LABEL Name=zegarek-windows
