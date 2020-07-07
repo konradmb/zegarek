@@ -176,7 +176,7 @@ task appimageDocker, "Build AppImage in Docker":
 task windows, "Build Windows binary":
   mkdir "build/Windows"
   cd "build"
-  run "nim c -d:release -d:nimDebugDlOpen -d:mingw --cpu:amd64 -o:Windows/zegarek ../src/zegarek.nim"
+  run "nim c -d:release -d:nimDebugDlOpen -d:mingw --cpu:amd64 --dynlibOverrideAll --passL:\"`x86_64-w64-mingw32-pkg-config --libs gtk+-3.0`\" -o:Windows/zegarek ../src/zegarek.nim"
   copyRequiredLibs("./Windows")
 
 task windowsDocker, "Build Windows binary in Docker":
