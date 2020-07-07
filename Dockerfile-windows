@@ -51,7 +51,7 @@ RUN gcc --version &&\
     find ~/.nimble/pkgs/gintro-* -type f -name "*.nim" -exec \
     sed -E -i "s/^const Lib = \"(.*)(\.so\.)([0-9]+)\"$/const Lib = \"\1-\3.dll\"/m" {} \; &&\
     find ~/.nimble/pkgs/gintro-* -type f -name "*.nim" -exec \
-    sed -E -i "s/^const GobjectLib\* = \"(.*)(\.so\.)([0-9]+)\"$/const Lib = \"\1-\3.dll\"/m" {} \; &&\
+    sed -E -i "s/^const GobjectLib\* = \"(.*)(\.so\.)([0-9]+)\"$/const GobjectLib\* = \"\1-\3.dll\"/m" {} \; &&\
     nimble -y windows
 
 # WHY????
