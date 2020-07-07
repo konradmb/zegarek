@@ -14,6 +14,27 @@ SHELL [ "/bin/bash", "-c" ]
 
 RUN mkdir build
 
+RUN echo $'\
+# /usr/lib/x86_64-linux-gnu/gtk-3.0/modules/libcanberra-gtk-module.so>gtk-3.0/modules/libcanberra-gtk-module.so\n\
+# /usr/lib/x86_64-linux-gnu/gtk-3.0/modules/libcanberra-gtk3-module.so>gtk-3.0/modules/libcanberra-gtk3-module.so\n\
+# /usr/lib/x86_64-linux-gnu/gtk-3.0/modules/libcanberra-gtk-module.so\n\
+# /usr/lib/x86_64-linux-gnu/gtk-3.0/modules/libcanberra-gtk3-module.so\n\
+/usr/x86_64-w64-mingw32/sys-root/mingw/bin/librsvg-2-2.dll\n\
+/usr/x86_64-w64-mingw32/sys-root/mingw/bin/libharfbuzz-0.dll\n\
+/usr/x86_64-w64-mingw32/sys-root/mingw/bin/libepoxy-0.dll\n\
+/usr/x86_64-w64-mingw32/sys-root/mingw/bin/libgio-2.0-0.dll\n\
+/usr/x86_64-w64-mingw32/sys-root/mingw/bin/libglib-2.0-0.dll\n\
+/usr/x86_64-w64-mingw32/sys-root/mingw/bin/libpango-1.0-0.dll\n\
+/usr/x86_64-w64-mingw32/sys-root/mingw/bin/libpangocairo-1.0-0.dll\n\
+/usr/x86_64-w64-mingw32/sys-root/mingw/bin/libpangoft2-1.0-0.dll\n\
+/usr/x86_64-w64-mingw32/sys-root/mingw/bin/libpangoxft-1.0-0.dll\n\
+/usr/x86_64-w64-mingw32/sys-root/mingw/bin/libgtk-3-0.dll\n\
+/usr/x86_64-w64-mingw32/sys-root/mingw/bin/libgdk-3-0.dll\n\
+' > build/requiredLibs
+RUN echo $'\
+#empty
+' > build/excludelist.local
+
 RUN gcc --version &&\
     nimble -y clean &&\ 
     nimble -y build &&\
