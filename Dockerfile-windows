@@ -17,6 +17,8 @@ RUN mkdir build
 RUN gcc --version &&\
     nimble -y clean &&\ 
     nimble -y build &&\
+    find ~/.nimble/pkgs/gintro-* -type f -name "*.nim" -exec \
+    sed -E -i "s/^const Lib = \"(.*)(\.so\.)([0-9]+)\"$/const Lib = \"\1-\3.dll\"/m" {} \; &&\
     nimble -y windows
 
 # WHY????
