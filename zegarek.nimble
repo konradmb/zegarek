@@ -177,7 +177,7 @@ task windows, "Build Windows binary":
   mkdir "build/Windows"
   cd "build"
   run "nim c -d:release -d:nimDebugDlOpen -d:mingw --cpu:amd64 -o:Windows/zegarek ../src/zegarek.nim"
-  copyRequiredLibs(".")
+  copyRequiredLibs("./Windows")
 
 task windowsDocker, "Build Windows binary in Docker":
   run "pwd"
