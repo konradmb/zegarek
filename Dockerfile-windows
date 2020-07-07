@@ -30,6 +30,16 @@ RUN echo $'\
 /usr/x86_64-w64-mingw32/sys-root/mingw/bin/libpangoxft-1.0-0.dll\n\
 /usr/x86_64-w64-mingw32/sys-root/mingw/bin/libgtk-3-0.dll\n\
 /usr/x86_64-w64-mingw32/sys-root/mingw/bin/libgdk-3-0.dll\n\
+/usr/x86_64-w64-mingw32/sys-root/mingw/bin/libgobject-2.0-0.dll\n\
+/usr/x86_64-w64-mingw32/sys-root/mingw/bin/libfontconfig-1.dll\n\
+/usr/x86_64-w64-mingw32/sys-root/mingw/bin/libfreetype-6.dll\n\
+/usr/x86_64-w64-mingw32/sys-root/mingw/bin/libintl-8.dll\n\
+/usr/x86_64-w64-mingw32/sys-root/mingw/bin/libpcre-1.dll\n\
+/usr/x86_64-w64-mingw32/sys-root/mingw/bin/libgcc_s_seh-1.dll\n\
+/usr/x86_64-w64-mingw32/sys-root/mingw/bin/libfribidi-0.dll\n\
+/usr/x86_64-w64-mingw32/sys-root/mingw/bin/libffi-6.dll\n\
+/usr/x86_64-w64-mingw32/sys-root/mingw/bin/iconv.dll\n\
+/usr/x86_64-w64-mingw32/sys-root/mingw/bin/libwinpthread-1.dll\n\
 ' > build/requiredLibs
 RUN echo $'\
 #empty
