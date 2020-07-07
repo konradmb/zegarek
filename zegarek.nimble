@@ -178,6 +178,7 @@ task windows, "Build Windows binary":
   cd "build"
   run "nim c -d:release -d:nimDebugDlOpen -d:mingw --cpu:amd64 -o:Windows/zegarek ../src/zegarek.nim"
   copyRequiredLibs("./Windows")
+  run "cp /usr/x86_64-w64-mingw32/sys-root/mingw/bin/*.dll ./Windows/"
 
 task windowsDocker, "Build Windows binary in Docker":
   run "pwd"
