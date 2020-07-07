@@ -178,6 +178,9 @@ task windows, "Build Windows binary":
   cd "build"
   run "nim c -d:release -d:nimDebugDlOpen -d:mingw --cpu:amd64 --dynlibOverrideAll --passL:\"`x86_64-w64-mingw32-pkg-config --libs gtk+-3.0`\" -o:Windows/zegarek ../src/zegarek.nim"
   copyRequiredLibs("./Windows")
+  cpFile("../res/zegarek-icon.svg", "Windows/zegarek-icon.svg")
+  cpFile("../src/main.css", "Windows/main.css")
+  cpFile("../src/main.glade", "Windows/main.glade")
 
 task windowsDocker, "Build Windows binary in Docker":
   run "pwd"
