@@ -52,6 +52,25 @@ proc downloadAndExtractAppImage(url: string, outputDir: string) =
     mv ./squashfs-root {outputDir}
   """
 
+proc copyRequiredLibs(baseDir: string, filename = "requiredLibs") =
+  if existsFile(filename):
+    var requiredLibs: seq[string]
+    for line in readFile(filename).splitLines():
+      # Ignore comments, empty lines and >
+      if line =~ peg"^\s*'#'.*" or line =~ peg"^\s*$" or line.contains(">"):
+        continue
+      requiredLibs.add(line.split("#")[0].replace(" ", ""))
+    writeFile("requiredLibsFiltered", requiredLibs.join("\n"))
+    echo "Libs to copy: ", requiredLibs
+    run "xargs -i cp -L {} " & baseDir & " < requiredLibsFiltered"
+    # Silence canberra error
+    var requiredSpecialLibs = readFile("requiredLibs").splitLines().filterIt(it.contains(">"))
+    for lib in requiredSpecialLibs:
+      echo fmt"Copying additional lib: {lib}"
+      let splitLib = lib.replace(" ", "").split(">")
+      mkdir baseDir/splitLib[1].splitFile().dir
+      cpFile splitLib[0], baseDir/splitLib[1]
+
 macro repeatProc(procVar: untyped, args: varargs[untyped]): untyped =
   result = newNimNode(nnkStmtList)
   for arg in args:
@@ -136,23 +155,7 @@ exec "${EXEC}" "$@"
 
   run fmt"VERSION={version} ./linuxdeploy/AppRun  --appdir AppDir"
 
-  if existsFile("requiredLibs"):
-    var requiredLibs: seq[string]
-    for line in readFile("requiredLibs").splitLines():
-      # Ignore comments, empty lines and >
-      if line =~ peg"^\s*'#'.*" or line =~ peg"^\s*$" or line.contains(">"):
-        continue
-      requiredLibs.add(line.split("#")[0].replace(" ", ""))
-    writeFile("requiredLibsFiltered", requiredLibs.join("\n"))
-    echo "Libs to copy: ", requiredLibs
-    run "xargs -i cp -L {} AppDir/usr/lib/ < requiredLibsFiltered"
-    # Silence canberra error
-    var requiredSpecialLibs = readFile("requiredLibs").splitLines().filterIt(it.contains(">"))
-    for lib in requiredSpecialLibs:
-      echo fmt"Copying additional lib: {lib}"
-      let splitLib = lib.replace(" ", "").split(">")
-      mkdir "AppDir/usr/lib"/splitLib[1].splitFile().dir
-      cpFile splitLib[0], "AppDir/usr/lib"/splitLib[1]
+  copyRequiredLibs("AppDir/usr/lib")
 
   if existsFile("excludelist.local"):
     for excludedLib in readFile("excludelist.local").splitLines():
@@ -171,9 +174,10 @@ task appimageDocker, "Build AppImage in Docker":
   run fmt"docker run -i --rm zegarek sh -c 'cd build && tar -c Zegarek*AppImage' | tar -x -C build/"
 
 task windows, "Build Windows binary":
-  mkdir("build/Windows")
-  cd("build")
+  mkdir "build/Windows"
+  cd "build"
   run "nim c -d:release -d:nimDebugDlOpen -d:mingw --cpu:amd64 -o:Windows/zegarek ../src/zegarek.nim"
+  copyRequiredLibs(".")
 
 task windowsDocker, "Build Windows binary in Docker":
   run "pwd"
