@@ -181,14 +181,14 @@ task windows, "Build Windows binary":
   cpFile("../res/zegarek-icon.svg", "Windows/zegarek-icon.svg")
   cpFile("../src/main.css", "Windows/main.css")
   cpFile("../src/main.glade", "Windows/main.glade")
-  run "mkdir -p share/icons/"
-  run "cp -R /usr/x86_64-w64-mingw32/sys-root/mingw/share/icons/ share/icons/"
+  run "mkdir -p Windows/share/icons/"
+  run "cp -R /usr/x86_64-w64-mingw32/sys-root/mingw/share/icons/ Windows/share/icons/"
 
 task windowsDocker, "Build Windows binary in Docker":
   run "pwd"
   run "docker build -t zegarek-windows -f ./Dockerfile-windows ."
   mkdir "build"
-  run fmt"docker run -i --rm zegarek-windows sh -c 'cd build/Windows && tar -c *' | tar -x -C build/"
+  run fmt"docker run -i --rm zegarek-windows sh -c 'cd build/ && tar -c Windows' | tar -x -C build/"
 
 task clean, "Clean build directory":
   cd("build")
