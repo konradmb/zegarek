@@ -48,7 +48,9 @@ proc activateGettext() =
 
 proc main: int =
   if isAppimage():
-    putEnv("GTK_EXE_PREFIX", appdir /../ "")
+    let setAppDir =  appdir /../ ""
+    putEnv("GTK_EXE_PREFIX", setAppDir)
+    echo "Running as AppImage, GTK_EXE_PREFIX set to ", setAppDir
   activateGettext()
 
   let app = newApplication("com.github.konradmb.zegarek", {ApplicationFlag.nonUnique})

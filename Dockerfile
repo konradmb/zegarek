@@ -5,7 +5,7 @@ RUN curl https://nim-lang.org/choosenim/init.sh -sSf > choosenim.sh &&\
     ./choosenim.sh -y
 ENV PATH "/root/.nimble/bin:$PATH"
 
-RUN nimble -y install gintro
+# RUN nimble -y install gintro
 
 COPY . /usr/src/zegarek
 WORKDIR /usr/src/zegarek

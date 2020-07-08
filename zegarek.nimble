@@ -27,6 +27,7 @@ template runGorge(cmd: string): string =
   gorge("cd " & system.getCurrentDir() & " && " & cmd)
 
 template run(cmd: string) =
+  echo "+ ", cmd
   echo runGorge(cmd)
 
 proc convertImage(filePath: string) =
@@ -51,6 +52,25 @@ proc downloadAndExtractAppImage(url: string, outputDir: string) =
     ./{filename} --appimage-extract
     mv ./squashfs-root {outputDir}
   """
+
+proc copyRequiredLibs(baseDir: string, filename = "requiredLibs") =
+  if existsFile(filename):
+    var requiredLibs: seq[string]
+    for line in readFile(filename).splitLines():
+      # Ignore comments, empty lines and >
+      if line =~ peg"^\s*'#'.*" or line =~ peg"^\s*$" or line.contains(">"):
+        continue
+      requiredLibs.add(line.split("#")[0].replace(" ", ""))
+    writeFile("requiredLibsFiltered", requiredLibs.join("\n"))
+    echo "Libs to copy: ", requiredLibs
+    run "xargs -i cp -L {} " & baseDir & " < requiredLibsFiltered"
+    # Silence canberra error
+    var requiredSpecialLibs = readFile("requiredLibs").splitLines().filterIt(it.contains(">"))
+    for lib in requiredSpecialLibs:
+      echo fmt"Copying additional lib: {lib}"
+      let splitLib = lib.replace(" ", "").split(">")
+      mkdir baseDir/splitLib[1].splitFile().dir
+      cpFile splitLib[0], baseDir/splitLib[1]
 
 macro repeatProc(procVar: untyped, args: varargs[untyped]): untyped =
   result = newNimNode(nnkStmtList)
@@ -136,23 +156,7 @@ exec "${EXEC}" "$@"
 
   run fmt"VERSION={version} ./linuxdeploy/AppRun  --appdir AppDir"
 
-  if existsFile("requiredLibs"):
-    var requiredLibs: seq[string]
-    for line in readFile("requiredLibs").splitLines():
-      # Ignore comments, empty lines and >
-      if line =~ peg"^\s*'#'.*" or line =~ peg"^\s*$" or line.contains(">"):
-        continue
-      requiredLibs.add(line.split("#")[0].replace(" ", ""))
-    writeFile("requiredLibsFiltered", requiredLibs.join("\n"))
-    echo "Libs to copy: ", requiredLibs
-    run "xargs -i cp -L {} AppDir/usr/lib/ < requiredLibsFiltered"
-    # Silence canberra error
-    var requiredSpecialLibs = readFile("requiredLibs").splitLines().filterIt(it.contains(">"))
-    for lib in requiredSpecialLibs:
-      echo fmt"Copying additional lib: {lib}"
-      let splitLib = lib.replace(" ", "").split(">")
-      mkdir "AppDir/usr/lib"/splitLib[1].splitFile().dir
-      cpFile splitLib[0], "AppDir/usr/lib"/splitLib[1]
+  copyRequiredLibs("AppDir/usr/lib")
 
   if existsFile("excludelist.local"):
     for excludedLib in readFile("excludelist.local").splitLines():
@@ -162,13 +166,40 @@ exec "${EXEC}" "$@"
       rmFile "AppDir/usr/lib"/excludedLib
 
 
-  downloadAndExtractAppImage("https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage", "appimagetool")
+  downloadAndExtractAppImage("https://github.com/AppImage/AppImageKit/releases/download/12/appimagetool-x86_64.AppImage", "appimagetool")
   run fmt"VERSION={version} ./appimagetool/AppRun AppDir"
 
 task appimageDocker, "Build AppImage in Docker":
   run "docker build -t zegarek ."
   mkdir "build"
   run fmt"docker run -i --rm zegarek sh -c 'cd build && tar -c Zegarek*AppImage' | tar -x -C build/"
+
+task windows, "Build Windows binary":
+  mkdir "build/Windows"
+  cd "build"
+  run "nim c -d:release -d:nimDebugDlOpen -d:mingw --cpu:amd64 --dynlibOverrideAll --passL:\"`x86_64-w64-mingw32-pkg-config --libs gtk+-3.0`\" -o:Windows/zegarek ../src/zegarek.nim"
+  copyRequiredLibs("./Windows")
+  # TODO
+  run "cp /usr/x86_64-w64-mingw32/sys-root/mingw/bin/*.dll ./Windows/"
+
+  cpFile("../res/zegarek-icon.svg", "Windows/zegarek-icon.svg")
+  cpFile("../src/main.css", "Windows/main.css")
+  cpFile("../src/main.glade", "Windows/main.glade")
+  run "mkdir -p Windows/share/"
+  run "cp -R /usr/x86_64-w64-mingw32/sys-root/mingw/share/icons/ Windows/share/"
+  run "cp -R /usr/x86_64-w64-mingw32/sys-root/mingw/share/glib-2.0/ Windows/share/"
+  run "mkdir -p Windows/lib/"
+  run "cp -R /usr/x86_64-w64-mingw32/sys-root/mingw/lib/gdk-pixbuf-2.0 Windows/lib/"
+  rmFile "Windows/lib/gdk-pixbuf-2.0/2.10.0/loaders.cache"
+  mvDir "Windows", fmt"Zegarek-{version}-Windows-64"
+  run fmt"zip -r -9 Zegarek-{version}-Windows-64.zip Zegarek-{version}-Windows-64"
+
+
+task windowsDocker, "Build Windows binary in Docker":
+  run "pwd"
+  run "docker build -t zegarek-windows -f ./Dockerfile-windows ."
+  mkdir "build"
+  run fmt"docker run -i --rm zegarek-windows sh -c 'cd build/ && tar -c Zegarek*Windows-64.zip' | tar -x -C build/"
 
 task clean, "Clean build directory":
   cd("build")

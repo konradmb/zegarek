@@ -1,0 +1,67 @@
+FROM konradmb/docker-gtk-crosscompile-windows
+
+RUN curl https://nim-lang.org/choosenim/init.sh -sSf > choosenim.sh &&\
+    chmod +x ./choosenim.sh &&\
+    ./choosenim.sh -y
+ENV PATH "/root/.nimble/bin:$PATH"
+
+# RUN nimble -y install gintro
+
+COPY . /usr/src/zegarek
+WORKDIR /usr/src/zegarek
+
+SHELL [ "/bin/bash", "-c" ]
+
+RUN mkdir build
+
+RUN echo $'\
+# /usr/lib/x86_64-linux-gnu/gtk-3.0/modules/libcanberra-gtk-module.so>gtk-3.0/modules/libcanberra-gtk-module.so\n\
+# /usr/lib/x86_64-linux-gnu/gtk-3.0/modules/libcanberra-gtk3-module.so>gtk-3.0/modules/libcanberra-gtk3-module.so\n\
+# /usr/lib/x86_64-linux-gnu/gtk-3.0/modules/libcanberra-gtk-module.so\n\
+# /usr/lib/x86_64-linux-gnu/gtk-3.0/modules/libcanberra-gtk3-module.so\n\
+/usr/x86_64-w64-mingw32/sys-root/mingw/bin/librsvg-2-2.dll\n\
+/usr/x86_64-w64-mingw32/sys-root/mingw/bin/libharfbuzz-0.dll\n\
+/usr/x86_64-w64-mingw32/sys-root/mingw/bin/libepoxy-0.dll\n\
+/usr/x86_64-w64-mingw32/sys-root/mingw/bin/libgio-2.0-0.dll\n\
+/usr/x86_64-w64-mingw32/sys-root/mingw/bin/libglib-2.0-0.dll\n\
+/usr/x86_64-w64-mingw32/sys-root/mingw/bin/libpango-1.0-0.dll\n\
+/usr/x86_64-w64-mingw32/sys-root/mingw/bin/libpangocairo-1.0-0.dll\n\
+/usr/x86_64-w64-mingw32/sys-root/mingw/bin/libpangoft2-1.0-0.dll\n\
+# /usr/x86_64-w64-mingw32/sys-root/mingw/bin/libpangoxft-1.0-0.dll\n\
+/usr/x86_64-w64-mingw32/sys-root/mingw/bin/libgtk-3-0.dll\n\
+/usr/x86_64-w64-mingw32/sys-root/mingw/bin/libgdk-3-0.dll\n\
+/usr/x86_64-w64-mingw32/sys-root/mingw/bin/libgobject-2.0-0.dll\n\
+/usr/x86_64-w64-mingw32/sys-root/mingw/bin/libfontconfig-1.dll\n\
+/usr/x86_64-w64-mingw32/sys-root/mingw/bin/libfreetype-6.dll\n\
+/usr/x86_64-w64-mingw32/sys-root/mingw/bin/libintl-8.dll\n\
+/usr/x86_64-w64-mingw32/sys-root/mingw/bin/libpcre-1.dll\n\
+/usr/x86_64-w64-mingw32/sys-root/mingw/bin/libgcc_s_seh-1.dll\n\
+/usr/x86_64-w64-mingw32/sys-root/mingw/bin/libfribidi-0.dll\n\
+/usr/x86_64-w64-mingw32/sys-root/mingw/bin/libffi-6.dll\n\
+/usr/x86_64-w64-mingw32/sys-root/mingw/bin/iconv.dll\n\
+/usr/x86_64-w64-mingw32/sys-root/mingw/bin/libwinpthread-1.dll\n\
+/usr/x86_64-w64-mingw32/sys-root/mingw/bin/libcairo-gobject-2.dll\n\
+/usr/x86_64-w64-mingw32/sys-root/mingw/bin/libcairo-2.dll\n\
+/usr/x86_64-w64-mingw32/sys-root/mingw/bin/libgdk_pixbuf-2.0-0.dll\n\
+/usr/x86_64-w64-mingw32/sys-root/mingw/bin/zlib1.dll\n\
+/usr/x86_64-w64-mingw32/sys-root/mingw/bin/libexpat-1.dll\n\
+/usr/x86_64-w64-mingw32/sys-root/mingw/bin/libbz2-1.dll\n\
+/usr/x86_64-w64-mingw32/sys-root/mingw/bin/libpng16-16.dll\n\
+' > build/requiredLibs
+RUN echo $'\
+#empty
+' > build/excludelist.local
+
+RUN gcc --version &&\
+    nimble -y clean &&\ 
+    nimble -y build &&\
+    find ~/.nimble/pkgs/gintro-* -type f -name "*.nim" -exec \
+    sed -E -i "s/^const Lib = \"(.*)(\.so\.)([0-9]+)\"$/const Lib = \"\1-\3.dll\"/m" {} \; &&\
+    find ~/.nimble/pkgs/gintro-* -type f -name "*.nim" -exec \
+    sed -E -i "s/^const GobjectLib\* = \"(.*)(\.so\.)([0-9]+)\"$/const GobjectLib\* = \"\1-\3.dll\"/m" {} \; &&\
+    nimble -y windows
+
+# WHY????
+# RUN printf '\x00' | dd bs=1 seek=8 count=1 conv=notrunc of=`ls build/Zegarek*AppImage`
+
+LABEL Name=zegarek-windows
