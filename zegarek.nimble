@@ -27,6 +27,7 @@ template runGorge(cmd: string): string =
   gorge("cd " & system.getCurrentDir() & " && " & cmd)
 
 template run(cmd: string) =
+  echo "+ ", cmd
   echo runGorge(cmd)
 
 proc convertImage(filePath: string) =
@@ -190,7 +191,7 @@ task windows, "Build Windows binary":
   run "mkdir -p Windows/lib/"
   run "cp -R /usr/x86_64-w64-mingw32/sys-root/mingw/lib/gdk-pixbuf-2.0 Windows/lib/"
   rmFile "Windows/lib/gdk-pixbuf-2.0/2.10.0/loaders.cache"
-  run "zip -9 Zegarek-{version}-Windows-64.zip Windows"
+  run fmt"zip -r -9 Zegarek-{version}-Windows-64.zip Windows"
 
 
 task windowsDocker, "Build Windows binary in Docker":
