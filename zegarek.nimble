@@ -166,7 +166,7 @@ exec "${EXEC}" "$@"
       rmFile "AppDir/usr/lib"/excludedLib
 
 
-  downloadAndExtractAppImage("https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage", "appimagetool")
+  downloadAndExtractAppImage("https://github.com/AppImage/AppImageKit/releases/download/12/appimagetool-x86_64.AppImage", "appimagetool")
   run fmt"VERSION={version} ./appimagetool/AppRun AppDir"
 
 task appimageDocker, "Build AppImage in Docker":
