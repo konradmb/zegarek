@@ -190,13 +190,14 @@ task windows, "Build Windows binary":
   run "mkdir -p Windows/lib/"
   run "cp -R /usr/x86_64-w64-mingw32/sys-root/mingw/lib/gdk-pixbuf-2.0 Windows/lib/"
   rmFile "Windows/lib/gdk-pixbuf-2.0/2.10.0/loaders.cache"
+  run "zip -9 Zegarek-{version}-Windows-64.zip Windows"
 
 
 task windowsDocker, "Build Windows binary in Docker":
   run "pwd"
   run "docker build -t zegarek-windows -f ./Dockerfile-windows ."
   mkdir "build"
-  run fmt"docker run -i --rm zegarek-windows sh -c 'cd build/ && tar -c Windows' | tar -x -C build/"
+  run fmt"docker run -i --rm zegarek-windows sh -c 'cd build/ && tar -c Zegarek*Windows-64.zip | tar -x -C build/"
 
 task clean, "Clean build directory":
   cd("build")

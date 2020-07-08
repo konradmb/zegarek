@@ -25,15 +25,19 @@ jobs:
     # Runs a set of commands using the runners shell
     - name: Build app
       run: |
-        # docker build -t zegarek .
-        # nimble appimageDocker
+        docker build -t zegarek .
+        nimble appimageDocker
         nimble windowsDocker
 
     - uses: actions/upload-artifact@v2
       with:
         name: AppImage
-        # path: build/Zegarek*.AppImage
-        path: build/*
+        path: build/Zegarek*.AppImage
+
+    - uses: actions/upload-artifact@v2
+      with:
+        name: Windows-64-zip
+        path: build/Zegarek*Windows-64.zip
 
     - name: Set ref
       id: set_ref
@@ -48,6 +52,8 @@ jobs:
       with:
         files: |
           build/Zegarek*.AppImage
+          build/Zegarek*Windows-64.zip
+
         draft: false
         prerelease: false
         name: Zegarek ${{ env.FILTERED_REF }}
