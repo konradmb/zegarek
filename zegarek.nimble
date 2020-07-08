@@ -105,7 +105,6 @@ proc buildL10nMo() =
   for lang in linguas:
     mkDir fmt"build/locale/{lang}/LC_MESSAGES"
     run fmt"msgfmt po/{lang}.po -o build/locale/{lang}/LC_MESSAGES/{getPackageName()}.mo"
-  run fmt"msgfmt --desktop --template=res/zegarek.desktop -d po -o build/zegarek.desktop"
 
 proc buildL10nDesktop() =
   run fmt"msgfmt --desktop --template=res/zegarek.desktop -d po -o build/zegarek.desktop"
@@ -175,22 +174,30 @@ task appimageDocker, "Build AppImage in Docker":
   run fmt"docker run -i --rm zegarek sh -c 'cd build && tar -c Zegarek*AppImage' | tar -x -C build/"
 
 task windows, "Build Windows binary":
+  buildL10nMo()
+  
   mkdir "build/Windows"
   cd "build"
-  run "nim c -d:release --app:gui -d:nimDebugDlOpen -d:mingw --cpu:amd64 --dynlibOverrideAll --passL:\"`x86_64-w64-mingw32-pkg-config --libs gtk+-3.0`\" -o:Windows/zegarek ../src/zegarek.nim"
-  copyRequiredLibs("./Windows")
+  run "mkdir -p Windows/bin/"
+  run "nim c -d:release --app:gui -d:nimDebugDlOpen -d:mingw --cpu:amd64 --dynlibOverrideAll --passL:\"`x86_64-w64-mingw32-pkg-config --libs gtk+-3.0`\" -o:Windows/bin/zegarek ../src/zegarek.nim"
+  
+  copyRequiredLibs("./Windows/bin/")
   # TODO
-  run "cp /usr/x86_64-w64-mingw32/sys-root/mingw/bin/*.dll ./Windows/"
+  run "cp /usr/x86_64-w64-mingw32/sys-root/mingw/bin/*.dll ./Windows/bin/"
 
-  cpFile("../res/zegarek-icon.svg", "Windows/zegarek-icon.svg")
-  cpFile("../src/main.css", "Windows/main.css")
-  cpFile("../src/main.glade", "Windows/main.glade")
+  cpFile("../res/zegarek-icon.svg", "Windows/bin/zegarek-icon.svg")
+  cpFile("../src/main.css", "Windows/bin/main.css")
+  cpFile("../src/main.glade", "Windows/bin/main.glade")
+  
   run "mkdir -p Windows/share/"
+  cpDir "locale", "Windows/share/locale"
   run "cp -R /usr/x86_64-w64-mingw32/sys-root/mingw/share/icons/ Windows/share/"
   run "cp -R /usr/x86_64-w64-mingw32/sys-root/mingw/share/glib-2.0/ Windows/share/"
+  
   run "mkdir -p Windows/lib/"
   run "cp -R /usr/x86_64-w64-mingw32/sys-root/mingw/lib/gdk-pixbuf-2.0 Windows/lib/"
   rmFile "Windows/lib/gdk-pixbuf-2.0/2.10.0/loaders.cache"
+  
   mvDir "Windows", fmt"Zegarek-{version}-Windows-64"
   run fmt"zip -r -9 Zegarek-{version}-Windows-64.zip Zegarek-{version}-Windows-64"
 
