@@ -6,6 +6,7 @@
 
 ## Download
 * [Linux - AppImage](https://github.com/konradmb/zegarek/releases/latest)
+* [Windows - portable .zip](https://github.com/konradmb/zegarek/releases/latest)
 
 ## Why?
 
