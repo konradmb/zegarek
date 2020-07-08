@@ -186,6 +186,7 @@ task windows, "Build Windows binary":
   cpFile("../src/main.glade", "Windows/main.glade")
   run "mkdir -p Windows/share/"
   run "cp -R /usr/x86_64-w64-mingw32/sys-root/mingw/share/icons/ Windows/share/"
+  run "cp -R /usr/x86_64-w64-mingw32/sys-root/mingw/share/glib-2.0/ Windows/share/"
   run "mkdir -p Windows/lib/"
   run "cp -R /usr/x86_64-w64-mingw32/sys-root/mingw/lib/gdk-pixbuf-2.0 Windows/lib/"
 
