@@ -181,8 +181,11 @@ task windows, "Build Windows binary":
   cpFile("../res/zegarek-icon.svg", "Windows/zegarek-icon.svg")
   cpFile("../src/main.css", "Windows/main.css")
   cpFile("../src/main.glade", "Windows/main.glade")
-  run "mkdir -p Windows/share/icons/"
-  run "cp -R /usr/x86_64-w64-mingw32/sys-root/mingw/share/icons/ Windows/share/icons/"
+  run "mkdir -p Windows/share/"
+  run "cp -R /usr/x86_64-w64-mingw32/sys-root/mingw/share/icons/ Windows/share/"
+  run "mkdir -p Windows/lib/"
+  run "cp -R /usr/x86_64-w64-mingw32/sys-root/mingw/lib/gdk-pixbuf-2.0 Windows/lib/"
+
 
 task windowsDocker, "Build Windows binary in Docker":
   run "pwd"
