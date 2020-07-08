@@ -191,7 +191,8 @@ task windows, "Build Windows binary":
   run "mkdir -p Windows/lib/"
   run "cp -R /usr/x86_64-w64-mingw32/sys-root/mingw/lib/gdk-pixbuf-2.0 Windows/lib/"
   rmFile "Windows/lib/gdk-pixbuf-2.0/2.10.0/loaders.cache"
-  run fmt"zip -r -9 Zegarek-{version}-Windows-64.zip Windows"
+  mvDir "Windows", fmt"Zegarek-{version}-Windows-64"
+  run fmt"zip -r -9 Zegarek-{version}-Windows-64.zip Zegarek-{version}-Windows-64"
 
 
 task windowsDocker, "Build Windows binary in Docker":
