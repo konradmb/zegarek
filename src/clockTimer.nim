@@ -1,17 +1,11 @@
 import gintro/[gtk, gdk, glib, gobject, gio]
 import times
 
+import settings, resizeClock
+
 var continueClockUpdates = true
 var label: Label
 var spinButton: SpinButton
-
-var millisecondsResolution = 1
-
-type timeFormat = enum
-  timeFormat12,
-  timeFormat24
-var currentTimeFormat = timeFormat24
-
 
 proc spinButtonValueChanged(button: SpinButton) =
   let value = button.getValue().toInt()
@@ -26,6 +20,7 @@ proc spinButtonValueChanged(button: SpinButton) =
     millisecondsResolution = 1
   else:
     echo "Invalid clock resolution entered: " & $value
+  resizeClock()
 
 proc setSpinButton*(button: SpinButton) =
   spinButton = button
@@ -34,8 +29,10 @@ proc setSpinButton*(button: SpinButton) =
 
 proc set12HoursFormat(button: ToggleButton) =
   currentTimeFormat = timeFormat12
+  resizeClock()
 proc set24HoursFormat(button: ToggleButton) =
   currentTimeFormat = timeFormat24
+  resizeClock()
 
 proc connect12HoursButton*(button: ToggleButton) =
   button.connect("toggled", set12HoursFormat)
