@@ -5,9 +5,9 @@ import commonVars, loadCss, settings
 include caseTuple
 
 proc resizeClock*() =
-  var width: int
-  var height: int
+  var width, height: int
   mainWindow.getSize(width, height)
+
   var size: float
   case (millisecondsResolution, currentTimeFormat):
     of (1, timeFormat24), (2, timeFormat24),
@@ -22,5 +22,4 @@ proc resizeClock*() =
 
 proc windowConfigureEvent*(window: ApplicationWindow, event: Event): bool =
   resizeClock()
-
   EventPropagate
