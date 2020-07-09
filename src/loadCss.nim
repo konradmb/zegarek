@@ -1,6 +1,6 @@
 import gintro/[gtk, gdk, glib, gobject, gio]
 
-import commonAppVars
+import commonVars
 
 proc loadCss*(append: string = "")=
   let screen = getDefaultScreen()

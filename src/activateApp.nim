@@ -1,7 +1,7 @@
 import gintro/[gtk, gdk, glib, gobject, gio]
 import os
 
-import commonAppVars, clockTimer, resizeClock, loadCss
+import commonVars, clockTimer, resizeClock, loadCss
 
 
 proc appActivateWithBuilder*(app: Application) =
@@ -12,9 +12,6 @@ proc appActivateWithBuilder*(app: Application) =
     discard mainWindow.setIconFromFile(appdir / "../../zegarek-icon.svg")
   elif existsFile(appdir / "../res/zegarek-icon.svg"):
     discard mainWindow.setIconFromFile(appdir / "../res/zegarek-icon.svg")
-
-  # let geometry = gdk.Geometry(minAspect: 1.777777, maxAspect: 1.777777)
-  # mainWindow.setGeometryHints(nil, geometry, {WindowHintsFlag.aspect})
 
   builder.getLabel("timeLabel").startClockTimer()
 

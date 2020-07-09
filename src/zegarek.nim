@@ -2,7 +2,7 @@ import gintro/[gtk, gdk, glib, gobject, gio]
 import os, system
 import libintl
 
-import activateApp, resizeClock, commonAppVars
+import activateApp, resizeClock, commonVars
 
 proc isAppimage(): bool =
   existsEnv("APPIMAGE")

@@ -1,7 +1,7 @@
 import gintro/[gtk, gdk]
 import strformat
 
-import commonAppVars, loadCss, settings
+import commonVars, loadCss, settings
 include caseTuple
 
 proc resizeClock*() =
