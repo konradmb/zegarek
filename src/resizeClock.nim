@@ -8,8 +8,6 @@ proc resizeClock*() =
   var width: int
   var height: int
   mainWindow.getSize(width, height)
-  # builder.getLabel("timeLabel").text = fmt"{width}x{height}"
-  # let ratio = width.float/height.float
   var size: float
   case (millisecondsResolution, currentTimeFormat):
     of (1, timeFormat24), (2, timeFormat24),
