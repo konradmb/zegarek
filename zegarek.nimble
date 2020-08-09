@@ -1,6 +1,6 @@
 # Package
 
-version       = "0.4.4"
+version       = "0.4.5"
 author        = "konradmb"
 description   = "A simple clock with milisecond resolution"
 license       = "GPL-3.0"
