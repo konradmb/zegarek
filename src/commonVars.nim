@@ -6,3 +6,4 @@ let appdir* = os.getAppDir() / "/"
 
 let builder*: Builder = newBuilder()
 var mainWindow*: ApplicationWindow
+var spinButton*: SpinButton

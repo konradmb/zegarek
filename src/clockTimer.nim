@@ -9,6 +9,7 @@ var spinButton: SpinButton
 
 proc spinButtonValueChanged(button: SpinButton) =
   let value = button.getValue().toInt()
+  millisecondsResolutionValue = value
   case value:
   of 0:
     millisecondsResolution = 5
